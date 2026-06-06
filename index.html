@@ -515,12 +515,61 @@ tr:hover td { background: var(--bg); }
   </div>
 </div>
 
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9998;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
+  <div style="width:48px;height:48px;border:5px solid rgba(201,168,76,0.3);border-top-color:#C9A84C;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  <div style="color:#FFD700;font-size:14px;font-weight:600;">กำลังบันทึก...</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
 <div id="toast" class="toast"></div>
 
 <script>
-// ========== DATA ==========
-function getData() { return JSON.parse(localStorage.getItem('lotto_data') || '{}'); }
-function saveData(d) { localStorage.setItem('lotto_data', JSON.stringify(d)); }
+// ============================================================
+//  CONFIG — ใส่ URL Apps Script ที่ได้จาก Deploy ตรงนี้
+// ============================================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwexMD_fVJKq912es9-mnj4EDrQ4T0p8EanyLm0fEDVbqDdmp8GkFBC1ijy12uhKAI/exec';
+// ============================================================
+
+// ========== DATA LAYER ==========
+// cache ใน memory ระหว่างเปิดหน้า (ไม่ใช้ localStorage อีกต่อไป)
+let _cache = null;
+
+async function api(action, body = {}) {
+  const resp = await fetch(SCRIPT_URL, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ action, ...body })
+  });
+  return resp.json();
+}
+
+async function loadAllData() {
+  showLoading(true);
+  try {
+    const res = await api('getAllData');
+    if (res.ok) {
+      _cache = res.data;
+    } else {
+      alert('โหลดข้อมูลไม่ได้: ' + (res.error || ''));
+      _cache = {};
+    }
+  } catch(e) {
+    alert('เชื่อมต่อ Google Sheets ไม่ได้ กรุณาตรวจสอบ SCRIPT_URL');
+    _cache = {};
+  } finally {
+    showLoading(false);
+  }
+}
+
+function getData()      { return _cache || {}; }
+function getCacheOrEmpty(period) {
+  if (!_cache[period]) _cache[period] = { tickets: {}, sales: {} };
+  return _cache[period];
+}
+
+function showLoading(on) {
+  document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none';
+}
 
 // ========== NAVIGATION ==========
 function showPage(id, noEvent) {
@@ -569,8 +618,6 @@ function populatePeriodSelects() {
 // ========== PAGE 1: RECEIVE ==========
 let pendingLottos = [];
 
-document.getElementById('receive-date').value = new Date().toISOString().slice(0,10);
-
 function addLottoToList() {
   const num = document.getElementById('num-input').value.trim();
   const copies = parseInt(document.getElementById('copies-input').value);
@@ -602,21 +649,32 @@ function renderLottoList() {
 function removeLotto(i) { pendingLottos.splice(i,1); renderLottoList(); }
 function clearLottoList() { pendingLottos = []; renderLottoList(); }
 
-function saveReceive() {
+async function saveReceive() {
   const dateVal = document.getElementById('receive-date').value;
   if (!dateVal) { toast('กรุณาเลือกงวดวันที่'); return; }
   if (!pendingLottos.length) { toast('ยังไม่มีชุดตัวเลข'); return; }
-  const data = getData();
-  if (!data[dateVal]) data[dateVal] = { tickets: {}, sales: {} };
-  pendingLottos.forEach(l => {
-    data[dateVal].tickets[l.num] = { num: l.num, copies: l.copies };
-  });
-  saveData(data);
-  toast('บันทึกสำเร็จ ' + pendingLottos.length + ' เลข');
-  pendingLottos = [];
-  renderLottoList();
-  updateHeaderPeriod(dateVal);
-  document.getElementById('header-period').textContent = 'งวด ' + formatDate(dateVal);
+
+  showLoading(true);
+  try {
+    const res = await api('saveTickets', { period: dateVal, tickets: pendingLottos });
+    if (!res.ok) { toast('บันทึกไม่สำเร็จ: ' + res.error); return; }
+
+    // อัปเดต cache
+    if (!_cache[dateVal]) _cache[dateVal] = { tickets: {}, sales: {} };
+    pendingLottos.forEach(l => {
+      _cache[dateVal].tickets[l.num] = { num: l.num, copies: l.copies };
+    });
+
+    toast('บันทึกสำเร็จ ' + pendingLottos.length + ' เลข');
+    pendingLottos = [];
+    renderLottoList();
+    populatePeriodSelects();
+    document.getElementById('header-period').textContent = 'งวด ' + formatDate(dateVal);
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
 }
 
 function loadPeriod() {
@@ -758,44 +816,43 @@ function openSellModal(slotKey, period) {
 
 function closeModal() { document.getElementById('sell-modal').classList.remove('open'); }
 
-function saveSale() {
-  const slotKey = document.getElementById('modal-number').value;
-  const period  = document.getElementById('modal-period').value;
+async function saveSale() {
+  const slotKey  = document.getElementById('modal-number').value;
+  const period   = document.getElementById('modal-period').value;
   const customer = document.getElementById('modal-customer').value.trim();
-  const qty = parseInt(document.getElementById('modal-qty').value) || 1;
+  const qty      = parseInt(document.getElementById('modal-qty').value) || 1;
   if (!customer) { toast('กรุณากรอกชื่อลูกค้า'); return; }
 
-  const data = getData();
-  if (!data[period].sales) data[period].sales = {};
-
-  const isSlot2 = slotKey.endsWith('_2');
-  const num = isSlot2 ? slotKey.slice(0,-2) : slotKey;
-  const ticket = data[period].tickets[num];
+  const isSlot2    = slotKey.endsWith('_2');
+  const num        = isSlot2 ? slotKey.slice(0,-2) : slotKey;
+  const ticket     = _cache[period]?.tickets[num];
   const isCombined = ticket?.copies === 2 && !isSlot2
-    && !data[period].sales[num] && !data[period].sales[num+'_2'];
+    && !_cache[period]?.sales?.[num] && !_cache[period]?.sales?.[num+'_2'];
 
   const saleObj = {
-    customer,
     channel: document.getElementById('modal-channel').value,
     payment: document.getElementById('modal-payment').value,
     status:  document.getElementById('modal-status').value,
     paydate: document.getElementById('modal-paydate').value,
-    savedAt: new Date().toISOString()
   };
 
-  if (isCombined && qty === 2) {
-    // ขายทั้งชุด 2 ใบ บันทึกทั้ง 2 slot
-    data[period].sales[num]       = { ...saleObj };
-    data[period].sales[num+'_2']  = { ...saleObj };
-  } else {
-    // ขาย 1 ใบ หรือแก้ไข slot ที่มีอยู่แล้ว
-    data[period].sales[slotKey] = { ...saleObj };
+  showLoading(true);
+  try {
+    const slots = (isCombined && qty === 2) ? [slotKey, slotKey+'_2'] : [slotKey];
+    for (const sk of slots) {
+      const res = await api('saveSale', { period, slotKey: sk, customer, ...saleObj });
+      if (!res.ok) { toast('บันทึกไม่สำเร็จ: ' + res.error); return; }
+      if (!_cache[period].sales) _cache[period].sales = {};
+      _cache[period].sales[sk] = { customer, ...saleObj, savedAt: new Date().toISOString() };
+    }
+    closeModal();
+    renderSellGrid();
+    toast('บันทึกสำเร็จ');
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    showLoading(false);
   }
-
-  saveData(data);
-  closeModal();
-  renderSellGrid();
-  toast('บันทึกสำเร็จ');
 }
 
 // ========== PAGE 3: REWARD ==========
@@ -895,12 +952,20 @@ function exportWinnerImage() {
 }
 
 // ========== PAGE 4: SUMMARY ==========
-function saveCostPrice(period) {
+async function saveCostPrice(period) {
   const val = parseFloat(document.getElementById('cost-input').value) || 0;
-  const data = getData();
-  if (data[period]) { data[period].costPerTicket = val; saveData(data); }
-  renderSummary();
-  toast('บันทึกราคาทุนแล้ว');
+  showLoading(true);
+  try {
+    const res = await api('saveConfig', { period, key: 'costPerTicket', value: val });
+    if (!res.ok) { toast('บันทึกไม่สำเร็จ'); return; }
+    if (_cache[period]) _cache[period].costPerTicket = val;
+    renderSummary();
+    toast('บันทึกราคาทุนแล้ว');
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
 }
 
 function renderSummary() {
@@ -1013,10 +1078,12 @@ function exportExcel(period) {
 }
 
 // ========== INIT ==========
-window.onload = () => {
+window.onload = async () => {
+  await loadAllData();
   populatePeriodSelects();
   const periods = getAllPeriods();
   if (periods.length) document.getElementById('header-period').textContent = 'งวด ' + formatDate(periods[0]);
+  document.getElementById('receive-date').value = new Date().toISOString().slice(0,10);
 };
 </script>
 </body>
