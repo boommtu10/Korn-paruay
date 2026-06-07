@@ -896,7 +896,7 @@ function openSellModal(slotKey, period) {
   const qtyEl = document.getElementById('modal-qty');
   const infoEl = document.getElementById('modal-copies-info');
   if (isCombined) {
-    qtyEl.innerHTML = '<option value="1">1 ใบ (เหลืออีก 1 ใบให้ขายต่อ)</option><option value="2">2 ใบ (ขายทั้งชุด)</option>';
+    qtyEl.innerHTML = '</option><option value="2">2 ใบ (ขายทั้งชุด)<option value="1">1 ใบ (เหลืออีก 1 ใบให้ขายต่อ)</option>';
     infoEl.style.display = 'block';
     infoEl.textContent = 'ชุดนี้มี 2 ใบ — ถ้าเลือก 1 ใบ ระบบจะแยกอีกใบออกมาให้ขายต่อได้';
   } else if (isBothSold) {
