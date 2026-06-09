@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -1598,8 +1599,9 @@ function renderSummary() {
     : totalAgentRevenue - totalAgentPayout;
 
   // ============ กำไรรวมทั้งหมด ============
-  // paperProfit นับรายได้จากใบของตัวแทนไปแล้ว → ต้องหัก payout ออกเท่านั้น ไม่บวก revenue ซ้ำ
-  const totalProfitAll = (paperProfit || 0) + digProfit + wsTotalProfit - totalAgentPayout;
+  // paperProfit รวม revenue ตัวแทนไปแล้ว → หัก revenue ตัวแทนออก แล้วบวก agentProfit (กำไรคงเหลือ) แทน
+  const agentRevenueTotal = totalAgentRevenue; // revenue ที่นับซ้ำใน paperProfit
+  const totalProfitAll = (paperProfit || 0) - agentRevenueTotal + digProfit + wsTotalProfit + agentProfit;
 
   el.innerHTML = `
   <!-- ===== L6 แบบใบ ===== -->
@@ -1933,8 +1935,8 @@ function renderSummary() {
         <div style="font-size:18px;font-weight:700;color:${wsTotalProfit>=0?'var(--green)':'var(--red)'};">${wsTotalProfit>=0?'+':''}฿${wsTotalProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
       </div>
       <div style="text-align:center;padding:12px;background:#fff;border-radius:8px;border:1px solid #cc88ff;">
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🤝 ตัวแทน (จ่ายออก)</div>
-        <div style="font-size:18px;font-weight:700;color:${totalAgentPayout>0?'var(--red)':'var(--text-muted)'};">${totalAgentPayout>0?'-฿'+totalAgentPayout.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🤝 ตัวแทน</div>
+        <div style="font-size:18px;font-weight:700;color:${agentCommission>0?(agentProfit>=0?'#6a2a9a':'var(--red)'):'var(--text-muted)'};">${agentCommission>0?(agentProfit>=0?'+':'')+'฿'+agentProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</div>
       </div>
     </div>
     <div style="padding:16px;background:linear-gradient(135deg,#1a0a00,#3d1f00);border-radius:10px;text-align:center;">
@@ -2113,11 +2115,11 @@ function exportExcel(period) {
     ['รวมกำไรขายส่ง','','','', wsTotalProfit],
     [],
     ['===== ตัวแทน ====='],
-    ['ช่องทาง','ใบแบบใบ','ใบดิจิตัล','รวม','ค่าคอมฯ/ใบ','กำไรคงเหลือ'],
-    ['น้องแน , มุก', agentPaperCount, agentDigCount, agentTotal, agentCommission, agentNetProfit],
+    ['ช่องทาง','ใบแบบใบ','ใบดิจิตัล','รวม','ค่าคอมฯ/ใบ','จ่ายตัวแทน'],
+    ['Facebook+Line', agentPaperCount, agentDigCount, agentTotal, agentCommission, agentNetProfit],
     [],
     ['===== กำไรสุทธิรวม ====='],
-    ['กำไร L6 แบบใบ + ดิจิตัล + ขายส่ง + กำไรคงเหลือ','','','','', totalNet],
+    ['กำไร L6 แบบใบ + ดิจิตัล + ขายส่ง − ตัวแทน','','','','', totalNet],
   ];
 
   const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
