@@ -2113,11 +2113,11 @@ function exportExcel(period) {
     ['รวมกำไรขายส่ง','','','', wsTotalProfit],
     [],
     ['===== ตัวแทน ====='],
-    ['ช่องทาง','ใบแบบใบ','ใบดิจิตัล','รวม','ค่าคอมฯ/ใบ','จ่ายตัวแทน'],
-    ['Facebook+Line', agentPaperCount, agentDigCount, agentTotal, agentCommission, agentNetProfit],
+    ['ช่องทาง','ใบแบบใบ','ใบดิจิตัล','รวม','ค่าคอมฯ/ใบ','กำไรคงเหลือ'],
+    ['น้องแน , มุก', agentPaperCount, agentDigCount, agentTotal, agentCommission, agentNetProfit],
     [],
     ['===== กำไรสุทธิรวม ====='],
-    ['กำไร L6 แบบใบ + ดิจิตัล + ขายส่ง − ตัวแทน','','','','', totalNet],
+    ['กำไร L6 แบบใบ + ดิจิตัล + ขายส่ง + กำไรคงเหลือ','','','','', totalNet],
   ];
 
   const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
