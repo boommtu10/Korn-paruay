@@ -2062,10 +2062,10 @@ function exportExcel(period) {
 
   // ตัวแทน: นับเฉพาะ sales ที่ชื่อลูกค้าตรงกับ AGENTS list
   const EXPORT_AGENTS = ['น้องแนน', 'มุก'];
-  const agentPaperCount = paperEntries.filter(([,s]) => EXPORT_AGENTS.includes(s.customer)).length;
-  const agentDigCount   = digEntries.filter(([,s]) => EXPORT_AGENTS.includes(s.customer)).length;
-  const agentTotal      = agentPaperCount + agentDigCount;
-  const agentPayout     = agentTotal * agentCommission;
+  const agentPaperCount  = paperEntries.filter(([,s]) => EXPORT_AGENTS.includes(s.customer)).length;
+  const agentDigCount    = digEntries.filter(([,s]) => EXPORT_AGENTS.includes(s.customer)).length;
+  const agentTotal       = agentPaperCount + agentDigCount;
+  const agentPayout      = agentTotal * agentCommission;  // ยอดให้ตัวแทน
 
   const ws = pd.wholesale || {};
   const persons = [
@@ -2080,10 +2080,11 @@ function exportExcel(period) {
     wsTotalProfit += price - cost;
   });
 
-  // กำไรสุทธิ: ใช้สูตรเดียวกับหน้าสรุป
-  // paperProfit คือกำไรจากใบทั้งหมด (รวมตัวแทน) แล้วหัก agentPayout ออก
-  const agentPaperCost = agentPaperCount * costPerTicket;
-  const totalNet = paperProfit + digProfit + wsTotalProfit - agentPayout - agentPaperCost;
+  // กำไรคงเหลือตัวแทน = ยอดขาย - ยอดให้ตัวแทน - ต้นทุนใบ (เหมือนหน้าสรุป)
+  const agentPaperCost   = agentPaperCount * costPerTicket;
+  const agentNetProfit   = (agentTotal * sellPrice) - agentPayout - agentPaperCost;
+  // กำไรสุทธิ = รวมทุกส่วน (ตัวแทนนับเป็นบวก เพราะคำนวณ net แล้ว)
+  const totalNet = paperProfit + digProfit + wsTotalProfit + agentNetProfit;
 
   // ===== สร้าง CSV =====
   const rows = [
@@ -2106,7 +2107,7 @@ function exportExcel(period) {
     [],
     ['===== ตัวแทน ====='],
     ['ช่องทาง','ใบแบบใบ','ใบดิจิตัล','รวม','ค่าคอมฯ/ใบ','จ่ายตัวแทน'],
-    ['Facebook+Line', agentPaperCount, agentDigCount, agentTotal, agentCommission, agentPayout],
+    ['Facebook+Line', agentPaperCount, agentDigCount, agentTotal, agentCommission, agentNetProfit],
     [],
     ['===== กำไรสุทธิรวม ====='],
     ['กำไร L6 แบบใบ + ดิจิตัล + ขายส่ง − ตัวแทน','','','','', totalNet],
