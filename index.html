@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -1590,7 +1591,10 @@ function renderSummary() {
   const agentCommission = parseFloat(pd.agentCommission) || 0;
   const totalAgentRevenue = agentData.reduce((s, a) => s + a.revenue, 0);
   const totalAgentPayout  = agentData.reduce((s, a) => s + a.totalCount * agentCommission, 0);
-  const agentProfit = totalAgentRevenue - totalAgentPayout;
+  const totalAgentPaperCount = agentData.reduce((s,a) => s + a.paperCount, 0);
+  const agentProfit = costPerTicket > 0
+    ? totalAgentRevenue - totalAgentPayout - (totalAgentPaperCount * costPerTicket)
+    : totalAgentRevenue - totalAgentPayout;
 
   // ============ กำไรรวมทั้งหมด ============
   const totalProfitAll = (paperProfit || 0) + digProfit + wsTotalProfit + agentProfit;
@@ -1873,14 +1877,15 @@ function renderSummary() {
             <th>ยอดขายได้</th>
             <th>ยอดให้ตัวแทน</th>
             <th>ราคาที่ตัวแทนชำระ</th>
-            <th>กำไรตัวแทน</th>
+            <th>กำไรคงเหลือ</th>
           </tr>
         </thead>
         <tbody>
           ${agentData.map(a => {
             const payout      = a.totalCount * agentCommission;
             const netCharge   = agentCommission > 0 ? a.revenue - payout : null;
-            const profit      = agentCommission > 0 ? a.revenue - payout : null;
+            const cost        = a.paperCount * (costPerTicket || 0);
+            const profit      = agentCommission > 0 ? a.revenue - payout - cost : null;
             return `<tr>
               <td style="font-weight:700;color:#6a2a9a;">${a.name}</td>
               <td>${a.paperCount}</td>
