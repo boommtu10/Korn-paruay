@@ -1598,13 +1598,13 @@ function renderSummary() {
     : totalAgentRevenue - totalAgentPayout;
 
   // ============ กำไรรวมทั้งหมด ============
-  // paperProfit รวม revenue ตัวแทนไปแล้ว → หัก revenue ตัวแทนออก แล้วบวก agentProfit (กำไรคงเหลือ) แทน
-  const agentRevenueTotal = totalAgentRevenue; // revenue ที่นับซ้ำใน paperProfit
-  // รวมตัวแทนเฉพาะเมื่อกรอก agentCommission แล้ว (มีข้อมูลครบ)
-  // ถ้ายังไม่กรอก → รวมแค่ แบบใบ + ดิจิตัล + ขายส่ง
+  // สูตร: แบบใบ + ดิจิตัล + ขายส่ง + กำไรคงเหลือตัวแทน
+  // paperProfit = กำไรใบทุกใบรวม (รวมของตัวแทนด้วย) คำนวณถูกต้องอยู่แล้ว
+  // agentProfit = กำไรคงเหลือตัวแทน (revenue - ค่าคอม - ต้นทุนใบ)
+  // รวมตัวแทนเฉพาะเมื่อกรอก agentCommission แล้ว ถ้ายังไม่กรอก → ไม่บวกเพิ่ม
   const agentPartIncluded = agentCommission > 0;
   const totalProfitAll = agentPartIncluded
-    ? (paperProfit || 0) - agentRevenueTotal + digProfit + wsTotalProfit + agentProfit
+    ? (paperProfit || 0) + digProfit + wsTotalProfit + agentProfit
     : (paperProfit || 0) + digProfit + wsTotalProfit;
 
   el.innerHTML = `
@@ -2119,11 +2119,11 @@ function exportExcel(period) {
     ['รวมกำไรขายส่ง','','','', wsTotalProfit],
     [],
     ['===== ตัวแทน ====='],
-    ['ช่องทาง','ใบแบบใบ','ใบดิจิตัล','รวม','ค่าคอมฯ/ใบ','กำไรคงเหลือ'],
-    ['น้าแนน+มุก', agentPaperCount, agentDigCount, agentTotal, agentCommission, agentNetProfit],
+    ['ช่องทาง','ใบแบบใบ','ใบดิจิตัล','รวม','ค่าคอมฯ/ใบ','จ่ายตัวแทน'],
+    ['Facebook+Line', agentPaperCount, agentDigCount, agentTotal, agentCommission, agentNetProfit],
     [],
     ['===== กำไรสุทธิรวม ====='],
-    ['กำไร L6 แบบใบ + ดิจิตัล + ขายส่ง + กำไรคงเหลือ','','','','', totalNet],
+    ['กำไร L6 แบบใบ + ดิจิตัล + ขายส่ง − ตัวแทน','','','','', totalNet],
   ];
 
   const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
