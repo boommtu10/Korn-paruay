@@ -1692,13 +1692,13 @@ function renderSummary() {
     <div class="card-title"><div class="card-title-icon" style="background:#e8f0fe;">💰</div>ราคาทุนต่อใบ — L6 ดิจิตัล</div>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <input type="number" id="digital-cost-input" class="form-input" style="max-width:160px;"
-        placeholder="70.40" value="${pd.digitalCostPerTicket || 70.40}" min="0" max="200" step="0.01">
-      <span style="font-size:13px;color:var(--text-secondary);">บาท/ใบ (ทุนปกติ 70.40 ขาย 80)</span>
+        placeholder="100" value="${pd.digitalCostPerTicket || 80}" min="0" max="200" step="0.01">
+      <span style="font-size:13px;color:var(--text-secondary);">บาท/ใบ (ทุนปกติ 80 ขาย 100)</span>
       <button class="btn btn-sm" style="background:#1a4f8a;color:#fff;" onclick="saveDigitalCostPrice('${period}')">บันทึก</button>
     </div>
     <div style="margin-top:10px;font-size:13px;color:var(--text-secondary);">
       ต้นทุนรวม ${totalDigitalTickets} ใบ × ${digitalCostPerTicket} = <strong>฿${(totalDigitalTickets*digitalCostPerTicket).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</strong>
-      &nbsp;|&nbsp; ขายที่ 80 บาท รายได้ ${soldDigitalTickets} ใบ = <strong>฿${(soldDigitalTickets*digitalSellPrice).toLocaleString()}</strong>
+      &nbsp;|&nbsp; ขายที่ 100 บาท รายได้ ${soldDigitalTickets} ใบ = <strong>฿${(soldDigitalTickets*digitalSellPrice).toLocaleString()}</strong>
     </div>
   </div>
 
