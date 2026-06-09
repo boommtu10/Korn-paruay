@@ -1591,12 +1591,15 @@ function renderSummary() {
   const totalAgentRevenue = agentData.reduce((s, a) => s + a.revenue, 0);
   const totalAgentPayout  = agentData.reduce((s, a) => s + a.totalCount * agentCommission, 0);
   const totalAgentPaperCount = agentData.reduce((s,a) => s + a.paperCount, 0);
+  // agentProfit = กำไรคงเหลือรวมของตัวแทน (ราคาที่ตัวแทนชำระ - ต้นทุน)
+  // = revenue - payout - cost  (ใช้แสดงในตาราง)
   const agentProfit = costPerTicket > 0
     ? totalAgentRevenue - totalAgentPayout - (totalAgentPaperCount * costPerTicket)
     : totalAgentRevenue - totalAgentPayout;
 
   // ============ กำไรรวมทั้งหมด ============
-  const totalProfitAll = (paperProfit || 0) + digProfit + wsTotalProfit + agentProfit;
+  // paperProfit นับรายได้จากใบของตัวแทนไปแล้ว → ต้องหัก payout ออกเท่านั้น ไม่บวก revenue ซ้ำ
+  const totalProfitAll = (paperProfit || 0) + digProfit + wsTotalProfit - totalAgentPayout;
 
   el.innerHTML = `
   <!-- ===== L6 แบบใบ ===== -->
@@ -1930,8 +1933,8 @@ function renderSummary() {
         <div style="font-size:18px;font-weight:700;color:${wsTotalProfit>=0?'var(--green)':'var(--red)'};">${wsTotalProfit>=0?'+':''}฿${wsTotalProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
       </div>
       <div style="text-align:center;padding:12px;background:#fff;border-radius:8px;border:1px solid #cc88ff;">
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🤝 ตัวแทน</div>
-        <div style="font-size:18px;font-weight:700;color:${agentProfit>=0?'#6a2a9a':'var(--red)'};">${agentCommission>0?(agentProfit>=0?'+':'')+'฿'+agentProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🤝 ตัวแทน (จ่ายออก)</div>
+        <div style="font-size:18px;font-weight:700;color:${totalAgentPayout>0?'var(--red)':'var(--text-muted)'};">${totalAgentPayout>0?'-฿'+totalAgentPayout.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</div>
       </div>
     </div>
     <div style="padding:16px;background:linear-gradient(135deg,#1a0a00,#3d1f00);border-radius:10px;text-align:center;">
