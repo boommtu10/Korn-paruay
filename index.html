@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -1601,7 +1600,12 @@ function renderSummary() {
   // ============ กำไรรวมทั้งหมด ============
   // paperProfit รวม revenue ตัวแทนไปแล้ว → หัก revenue ตัวแทนออก แล้วบวก agentProfit (กำไรคงเหลือ) แทน
   const agentRevenueTotal = totalAgentRevenue; // revenue ที่นับซ้ำใน paperProfit
-  const totalProfitAll = (paperProfit || 0) - agentRevenueTotal + digProfit + wsTotalProfit + agentProfit;
+  // รวมตัวแทนเฉพาะเมื่อกรอก agentCommission แล้ว (มีข้อมูลครบ)
+  // ถ้ายังไม่กรอก → รวมแค่ แบบใบ + ดิจิตัล + ขายส่ง
+  const agentPartIncluded = agentCommission > 0;
+  const totalProfitAll = agentPartIncluded
+    ? (paperProfit || 0) - agentRevenueTotal + digProfit + wsTotalProfit + agentProfit
+    : (paperProfit || 0) + digProfit + wsTotalProfit;
 
   el.innerHTML = `
   <!-- ===== L6 แบบใบ ===== -->
