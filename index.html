@@ -2073,12 +2073,28 @@ function exportExcel(period) {
   const paperProfit  = paperRevenue - paperCost;
   const digProfit    = digRevenue   - digCost;
 
-  // ตัวแทน: นับเฉพาะ sales ที่ชื่อลูกค้าตรงกับ AGENTS list
+  // ตัวแทน: นับเฉพาะ sales ที่ชื่อลูกค้าตรงกับ AGENTS list (แยกรายชื่อ)
   const EXPORT_AGENTS = ['น้องแนน', 'มุก'];
-  const agentPaperCount  = paperEntries.filter(([,s]) => EXPORT_AGENTS.includes(s.customer)).length;
-  const agentDigCount    = digEntries.filter(([,s]) => EXPORT_AGENTS.includes(s.customer)).length;
+
+  // คำนวณแต่ละตัวแทนแยกกัน
+  const agentDetails = EXPORT_AGENTS.map(name => {
+    const aPaper   = paperEntries.filter(([,s]) => s.customer === name).length;
+    const aDig     = digEntries.filter(([,s]) => s.customer === name).length;
+    const aTotal   = aPaper + aDig;
+    const aSell    = aTotal * sellPrice;                     // ยอดขายได้
+    const aPayout  = aTotal * agentCommission;               // ยอดให้ตัวแทน
+    const aCost    = aPaper * costPerTicket;                 // ต้นทุนใบแบบ (ดิจิตัลไม่มีต้นทุนใบ)
+    const aNet     = aSell - aPayout - aCost;                // กำไรคงเหลือ
+    return { name, aPaper, aDig, aTotal, aSell, aPayout, aNet };
+  });
+
+  // ยอดรวมทุกตัวแทน (ใช้คำนวณ totalNet ด้านล่าง)
+  const agentPaperCount  = agentDetails.reduce((s,a) => s + a.aPaper, 0);
+  const agentDigCount    = agentDetails.reduce((s,a) => s + a.aDig,   0);
   const agentTotal       = agentPaperCount + agentDigCount;
-  const agentPayout      = agentTotal * agentCommission;  // ยอดให้ตัวแทน
+  const agentPayout      = agentTotal * agentCommission;
+  const agentPaperCost   = agentPaperCount * costPerTicket;
+  const agentNetProfit   = (agentTotal * sellPrice) - agentPayout - agentPaperCost;
 
   const ws = pd.wholesale || {};
   const persons = [
@@ -2093,10 +2109,7 @@ function exportExcel(period) {
     wsTotalProfit += price - cost;
   });
 
-  // กำไรคงเหลือตัวแทน = ยอดขาย - ยอดให้ตัวแทน - ต้นทุนใบ (เหมือนหน้าสรุป)
-  const agentPaperCost   = agentPaperCount * costPerTicket;
-  const agentNetProfit   = (agentTotal * sellPrice) - agentPayout - agentPaperCost;
-  // กำไรสุทธิ = รวมทุกส่วน (ตัวแทนนับเป็นบวก เพราะคำนวณ net แล้ว)
+  // กำไรสุทธิ = รวมทุกส่วน
   const totalNet = paperProfit + digProfit + wsTotalProfit + agentNetProfit;
 
   // ===== สร้าง CSV =====
@@ -2119,8 +2132,11 @@ function exportExcel(period) {
     ['รวมกำไรขายส่ง','','','', wsTotalProfit],
     [],
     ['===== ตัวแทน ====='],
-    ['ชื่อตัวแทน','ใบแบบใบ','ใบดิจิตัล','รวม','ค่าคอมฯ/ใบ','กำไรคงเหลือ'],
-    ['น้องแนน+มุก', agentPaperCount, agentDigCount, agentTotal, agentCommission, agentNetProfit],
+    ['ชื่อตัวแทน','ใบ (แบบใบ)','ใบ (ดิจิตัล)','รวม','ยอดขายได้','ยอดให้ตัวแทน','ราคาที่ตัวแทนชำระ','กำไรคงเหลือ'],
+    ...agentDetails.map(a => [a.name, a.aPaper, a.aDig, a.aTotal, a.aSell, a.aPayout, a.aSell - a.aPayout, a.aNet]),
+    ['รวม', agentPaperCount, agentDigCount, agentTotal,
+      agentTotal * sellPrice, agentPayout,
+      (agentTotal * sellPrice) - agentPayout, agentNetProfit],
     [],
     ['===== กำไรสุทธิรวม ====='],
     ['กำไร L6 แบบใบ + ดิจิตัล + ขายส่ง + กำไรคงเหลือ','','','','', totalNet],
