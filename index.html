@@ -631,7 +631,12 @@ async function loadAllData() {
             paperTickets[num] = t;
           }
         });
-        normalized[nk] = { ...pd, tickets: paperTickets, digitalTickets, agentCommission: pd.agentCommission || 0 };
+        // agentCommission: ใช้ค่าจาก backend ก่อน ถ้าไม่มีค้นหาจาก localStorage
+        let agentCom = parseFloat(pd.agentCommission) || 0;
+        if (!agentCom) {
+          try { agentCom = parseFloat(localStorage.getItem('agentCommission_' + nk)) || 0; } catch(_) {}
+        }
+        normalized[nk] = { ...pd, tickets: paperTickets, digitalTickets, agentCommission: agentCom };
       });
       _cache = normalized;
     } else {
@@ -1409,6 +1414,8 @@ async function saveAgentCommission(period) {
     const res = await api('saveConfig', { period, key: 'agentCommission', value: val });
     if (!res.ok) { toast('บันทึกไม่สำเร็จ'); return; }
     if (_cache[period]) _cache[period].agentCommission = val;
+    // สำรองไว้ใน localStorage เผื่อ backend ไม่ส่งกลับมาตอนโหลด
+    try { localStorage.setItem('agentCommission_' + period, String(val)); } catch(_) {}
     renderSummary();
     toast('บันทึกค่าคอมมิชชันตัวแทนแล้ว');
   } catch(e) {
