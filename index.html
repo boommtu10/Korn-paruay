@@ -578,8 +578,15 @@ tr:hover td { background: var(--bg); }
 // ============================================================
 //  CONFIG — ใส่ URL Apps Script ที่ได้จาก Deploy ตรงนี้
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjRZZIecZK7_BlSU4Rxju4e0Wh3kTk0Y42t8mgj149VelCFQ9KDgpms5m5pAcTzgY/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfvZPh7EwoznRjARxa-_qdKgxZLR7p9uXtECD9hZSeSaoYX7gt3dJ6auFiN3CaGec/exec';
 // ============================================================
+
+// ชื่อและ key ของกลุ่มขายส่ง — ใช้ร่วมกันใน renderSummary และ exportExcel
+const WS_PERSONS = [
+  { key: 'mae',    label: 'แม่' },
+  { key: 'oom',    label: 'อ้อม' },
+  { key: 'padpee', label: 'พี่ปัด' },
+];
 
 // ========== DATA LAYER ==========
 // cache ใน memory ระหว่างเปิดหน้า (ไม่ใช้ localStorage อีกต่อไป)
@@ -1065,7 +1072,7 @@ function openSellModal(slotKey, period) {
   const qtyEl = document.getElementById('modal-qty');
   const infoEl = document.getElementById('modal-copies-info');
   if (isCombined) {
-    qtyEl.innerHTML = '</option><option value="2">2 ใบ (ขายทั้งชุด)<option value="1">1 ใบ (เหลืออีก 1 ใบให้ขายต่อ)</option>';
+    qtyEl.innerHTML = '<option value="2">2 ใบ (ขายทั้งชุด)</option><option value="1">1 ใบ (เหลืออีก 1 ใบให้ขายต่อ)</option>';
     infoEl.style.display = 'block';
     infoEl.textContent = 'ชุดนี้มี 2 ใบ — ถ้าเลือก 1 ใบ ระบบจะแยกอีกใบออกมาให้ขายต่อได้';
   } else if (isBothSold) {
@@ -1208,54 +1215,11 @@ const PRIZES = {
   r2:  { label: 'เลข 2 ตัวล่าง',         amount: 2000    },
 };
 
-// ---------- ดึงผลรางวัลจาก URL ผ่าน GAS proxy ----------
-async function fetchLottoResult() {
-  const url = document.getElementById('reward-url').value.trim();
-  if (!url) { toast('กรุณาใส่ URL ก่อน'); return; }
-  const statusEl = document.getElementById('fetch-status');
-  statusEl.textContent = '⏳ กำลังดึงข้อมูล...';
-  statusEl.style.color = 'var(--text-muted)';
-  showLoading(true);
-  try {
-    const res = await api('fetchLottoResult', { url });
-    if (!res.ok) {
-      statusEl.textContent = '❌ ' + (res.error || 'ดึงข้อมูลไม่สำเร็จ');
-      statusEl.style.color = 'var(--red)';
-      return;
-    }
-    const d = res.result;
-    // เติมช่องทั้งหมด
-    if (d.r1)   document.getElementById('r1').value   = d.r1;
-    if (d.rn1a) document.getElementById('rn1a').value = d.rn1a;
-    if (d.rn1b) document.getElementById('rn1b').value = d.rn1b;
-    if (d.r3f)  document.getElementById('r3f').value  = d.r3f;
-    if (d.r3f2) document.getElementById('r3f2').value = d.r3f2;
-    if (d.r3b)  document.getElementById('r3b').value  = d.r3b;
-    if (d.r3b2) document.getElementById('r3b2').value = d.r3b2;
-    if (d.r2)   document.getElementById('r2').value   = d.r2;
-    if (d.r2nd) document.getElementById('r2nd').value = d.r2nd;
-    if (d.r3rd) document.getElementById('r3rd').value = d.r3rd;
-    if (d.r4)   document.getElementById('r4').value   = d.r4;
-    if (d.r5)   document.getElementById('r5').value   = d.r5;
-
-    const filled = Object.values(d).filter(Boolean).length;
-    statusEl.textContent = '✅ ดึงข้อมูลสำเร็จ — เติม ' + filled + ' รายการ';
-    statusEl.style.color = 'var(--green)';
-    toast('ดึงผลรางวัลสำเร็จ');
-  } catch(e) {
-    statusEl.textContent = '❌ ' + e.message;
-    statusEl.style.color = 'var(--red)';
-  } finally {
-    showLoading(false);
-  }
-}
-
 function clearRewardFields() {
   ['r1','rn1a','rn1b','r3f','r3f2','r3b','r3b2','r2','r2nd','r3rd','r4','r5'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  const fs = document.getElementById('fetch-status'); if (fs) fs.textContent = '';
   document.getElementById('reward-results').innerHTML = '';
   toast('ล้างเลขรางวัลแล้ว');
 }
@@ -1459,11 +1423,10 @@ async function saveDigitalCostPrice(period) {
 
 // บันทึกข้อมูลขายส่ง
 async function saveWholesale(period) {
-  const persons = ['mae','oom','padpee'];
   const data = {};
-  persons.forEach(p => {
-    data[p + '_cost']  = parseFloat(document.getElementById('ws-' + p + '-cost').value)  || 0;
-    data[p + '_price'] = parseFloat(document.getElementById('ws-' + p + '-price').value) || 0;
+  WS_PERSONS.forEach(p => {
+    data[p.key + '_cost']  = parseFloat(document.getElementById('ws-' + p.key + '-cost').value)  || 0;
+    data[p.key + '_price'] = parseFloat(document.getElementById('ws-' + p.key + '-price').value) || 0;
   });
   showLoading(true);
   try {
@@ -1562,12 +1525,7 @@ function renderSummary() {
   // ============ ขายส่ง ============
   let ws = pd.wholesale || {};
   if (typeof ws === 'string') { try { ws = JSON.parse(ws); } catch(_) { ws = {}; } }
-  const wsPersons = [
-    { key:'mae',   label:'แม่' },
-    { key:'oom',   label:'อ้อม' },
-    { key:'padpee',label:'พี่ปัด' },
-  ];
-  const wsRows = wsPersons.map(p => {
+  const wsRows = WS_PERSONS.map(p => {
     const cost  = parseFloat(ws[p.key+'_cost'])  || 0;
     const price = parseFloat(ws[p.key+'_price']) || 0;
     return { ...p, cost, price, profit: price - cost };
@@ -2104,13 +2062,8 @@ function exportExcel(period) {
   const agentNetProfit   = (agentTotal * sellPrice) - agentPayout - agentPaperCost;
 
   const ws = pd.wholesale || {};
-  const persons = [
-    { key:'mae',   label:'แม่' },
-    { key:'oom',   label:'อุ้ม' },
-    { key:'padpee',label:'พัดพี' },
-  ];
   let wsTotalProfit = 0;
-  persons.forEach(p => {
+  WS_PERSONS.forEach(p => {
     const cost  = ws[p.key+'_cost']  || 0;
     const price = ws[p.key+'_price'] || 0;
     wsTotalProfit += price - cost;
@@ -2131,7 +2084,7 @@ function exportExcel(period) {
     [],
     ['===== ขายส่ง ====='],
     ['ชื่อ','ราคาทุน','ราคาส่ง','กำไร'],
-    ...persons.map(p => {
+    ...WS_PERSONS.map(p => {
       const c = ws[p.key+'_cost'] || 0;
       const r = ws[p.key+'_price'] || 0;
       return [p.label, c, r, r - c];
