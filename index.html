@@ -1011,7 +1011,10 @@ function renderSellGrid() {
       qtyLabel = `<div style="font-size:10px;color:var(--text-muted);">${c.soldCount} ใบ</div>`;
     }
     const custLabel = c.sale ? `<div style="font-size:10px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">${c.sale.customer}</div>` : '';
-    return `<div class="num-cell ${c.status}" style="border-color:${c.status==='available'?'#a8c4f5':''}" ${clickable ? `onclick="openDigitalSellModal('${c.num}','${period}')"` : ''}>
+    const clickHandler = c.status === 'available'
+      ? `openDigitalSellModal('${c.num}','${period}')`
+      : `openDigitalEditModal('${c.num}','${period}','${c.slotKey}')`;
+    return `<div class="num-cell ${c.status}" style="border-color:${c.status==='available'?'#a8c4f5':''}" ${clickable ? `onclick="${clickHandler}"` : ''}>
       <div class="num" style="color:#1a4f8a;">${c.num}</div>
       ${qtyLabel}
       ${custLabel}
@@ -1140,6 +1143,35 @@ function openDigitalSellModal(num, period) {
   document.getElementById('sell-modal').classList.add('open');
 }
 
+// Modal สำหรับแก้ไขรายการ L6 ดิจิตัล ที่ขายไปแล้ว (เปลี่ยนสถานะ/ข้อมูลลูกค้า)
+function openDigitalEditModal(num, period, slotKey) {
+  const data = getData();
+  const pd = data[period];
+  const sale = pd?.sales?.[slotKey];
+  if (!sale) { toast('ไม่พบข้อมูล'); return; }
+
+  currentEditSale = { slotKey, num: 'DIG_' + num, period, isDigital: true, isDigitalEdit: true, digitalNum: num };
+
+  document.getElementById('modal-num').textContent = num + '  [💻 ดิจิตัล — แก้ไขรายการ]';
+  document.getElementById('modal-num').style.color = '#1a4f8a';
+  document.getElementById('modal-number').value = slotKey;
+  document.getElementById('modal-period').value = period;
+  document.getElementById('modal-customer').value = sale.customer || '';
+  document.getElementById('modal-channel').value = sale.channel || 'หน้าบ้าน';
+  document.getElementById('modal-payment').value = sale.payment || 'เงินสด';
+  document.getElementById('modal-status').value = sale.status || 'pending';
+  document.getElementById('modal-paydate').value = sale.paydate || '';
+
+  const qtyEl = document.getElementById('modal-qty');
+  qtyEl.innerHTML = '<option value="1">1 ใบ</option>';
+
+  const infoEl = document.getElementById('modal-copies-info');
+  infoEl.style.display = 'block';
+  infoEl.textContent = `กำลังแก้ไขรายการของ ${sale.customer || ''}`;
+
+  document.getElementById('sell-modal').classList.add('open');
+}
+
 async function saveSale() {
   const slotKey  = document.getElementById('modal-number').value;
   const period   = document.getElementById('modal-period').value;
@@ -1159,6 +1191,13 @@ async function saveSale() {
   showLoading(true);
   try {
     if (isDigital) {
+      if (currentEditSale?.isDigitalEdit) {
+        // แก้ไขรายการที่ขายไปแล้ว: บันทึกทับ slot เดิม
+        const res = await api('saveSale', { period, slotKey, customer, ...saleObj });
+        if (!res.ok) { toast('บันทึกไม่สำเร็จ: ' + res.error); return; }
+        if (!_cache[period].sales) _cache[period].sales = {};
+        _cache[period].sales[slotKey] = { customer, ...saleObj, savedAt: new Date().toISOString() };
+      } else {
       // Digital: หา slots ถัดไปตาม qty ที่เลือก
       const { digitalNum, totalCopies } = currentEditSale;
       const slots = [];
@@ -1172,6 +1211,7 @@ async function saveSale() {
         if (!res.ok) { toast('บันทึกไม่สำเร็จ: ' + res.error); return; }
         if (!_cache[period].sales) _cache[period].sales = {};
         _cache[period].sales[sk] = { customer, ...saleObj, savedAt: new Date().toISOString() };
+      }
       }
     } else {
       const isSlot2    = slotKey.endsWith('_2');
