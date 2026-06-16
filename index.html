@@ -945,15 +945,19 @@ function renderSellGrid() {
       const sk = nextSlot === 1 ? 'DIG_' + num : 'DIG_' + num + '_' + nextSlot;
       digitalCells.push({ num, slotKey: sk, totalCopies, remainCount, soldCount, status:'available', isDigital:true });
     }
-    // แสดง cells ที่ขายแล้ว (รวมเป็นกลุ่มต่อลูกค้า)
+    // แสดง cells ที่ขายแล้ว (รวมเป็นกลุ่มต่อลูกค้า + สถานะ)
+    // หมายเหตุ: เดิมรวมกลุ่มแค่ตามชื่อลูกค้าอย่างเดียว แล้วใช้สถานะของ slot แรกที่เจอ
+    // เป็นตัวแทนทั้งกลุ่ม ถ้าลูกค้าคนเดียวกันซื้อหลายใบแต่บางใบ "รอชำระ" บางใบ "ชำระแล้ว"
+    // จะถูกซ่อนรวมเป็นสถานะเดียว ทำให้ยอดรอชำระในหน้านี้น้อยกว่าความเป็นจริง (ไม่ตรงกับหน้าสรุป)
+    // แก้ไขโดยรวมกลุ่มตาม ลูกค้า + สถานะ เพื่อให้ใบที่สถานะต่างกันแยกเป็นคนละ card เสมอ
     const soldByCustomer = {};
     soldSlots.forEach(({ sk, sale }) => {
-      const k = sale.customer;
-      if (!soldByCustomer[k]) soldByCustomer[k] = { sale, count: 0, slotKey: sk };
+      const st = sale.status === 'paid' ? 'paid' : 'pending';
+      const k = sale.customer + '|' + st;
+      if (!soldByCustomer[k]) soldByCustomer[k] = { sale, count: 0, slotKey: sk, status: st };
       soldByCustomer[k].count++;
     });
-    Object.values(soldByCustomer).forEach(({ sale, count, slotKey: sk }) => {
-      const st = sale.status === 'paid' ? 'paid' : 'pending';
+    Object.values(soldByCustomer).forEach(({ sale, count, slotKey: sk, status: st }) => {
       digitalCells.push({ num, slotKey: sk, totalCopies, remainCount:0, soldCount: count, status:st, sale, isDigital:true });
     });
   });
