@@ -1486,6 +1486,38 @@ async function saveWholesale(period) {
   }
 }
 
+// ========== AGENT MANAGEMENT ==========
+function getAgentList() {
+  try {
+    const stored = localStorage.getItem('agentList');
+    if (stored) {
+      const arr = JSON.parse(stored);
+      if (Array.isArray(arr) && arr.length) return arr;
+    }
+  } catch(_) {}
+  return ['น้องแนน', 'มุก']; // ค่าเริ่มต้น
+}
+function saveAgentList(arr) {
+  try { localStorage.setItem('agentList', JSON.stringify(arr)); } catch(_) {}
+}
+function addAgent() {
+  const name = prompt('กรอกชื่อตัวแทนที่ต้องการเพิ่ม:');
+  if (!name || !name.trim()) return;
+  const agents = getAgentList();
+  if (agents.includes(name.trim())) { toast('มีชื่อนี้อยู่แล้ว'); return; }
+  agents.push(name.trim());
+  saveAgentList(agents);
+  renderSummary();
+  toast('เพิ่มตัวแทน "' + name.trim() + '" แล้ว');
+}
+function removeAgent(name) {
+  if (!confirm('ต้องการลบตัวแทน "' + name + '" ออกจากรายการใช่ไหม?')) return;
+  const agents = getAgentList().filter(a => a !== name);
+  saveAgentList(agents);
+  renderSummary();
+  toast('ลบตัวแทน "' + name + '" แล้ว');
+}
+
 function renderSummary() {
   const period = document.getElementById('summary-period').value;
   const el = document.getElementById('summary-content');
@@ -1577,8 +1609,8 @@ function renderSummary() {
   const wsTotalProfit = wsRows.reduce((s,r) => s + r.profit, 0);
 
   // ============ ตัวแทน ============
-  // ดึงชื่อลูกค้า paper + digital ทั้งหมด แล้วจับคู่กับตัวแทน น้องแนน / มุก
-  const AGENTS = ['น้องแนน', 'มุก'];
+  // ดึงชื่อลูกค้า paper + digital ทั้งหมด แล้วจับคู่กับตัวแทนที่กำหนดไว้
+  const AGENTS = getAgentList();
   const agentSellPrice = 100; // ราคาขายต่อใบที่ลูกค้าจ่าย
 
   // รวม sales ทั้งหมด (paper + digital)
@@ -1869,6 +1901,7 @@ function renderSummary() {
   <div style="background:linear-gradient(135deg,#2a1a4a,#4a2a7a);padding:14px 18px;border-radius:10px;margin:16px 0 4px;display:flex;align-items:center;gap:8px;">
     <span style="font-size:18px;">🤝</span>
     <span style="font-size:16px;font-weight:700;color:#CC88FF;">ตัวแทน</span>
+    <button class="btn btn-sm" onclick="addAgent()" style="margin-left:auto;background:#6a2a9a;color:#fff;border:1.5px solid #CC88FF;">+ เพิ่มตัวแทน</button>
   </div>
 
   <div class="card" style="border-color:#cc88ff;">
@@ -1895,6 +1928,7 @@ function renderSummary() {
             <th>ยอดให้ตัวแทน</th>
             <th>ราคาที่ตัวแทนชำระ</th>
             <th>กำไรคงเหลือ</th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -1914,6 +1948,7 @@ function renderSummary() {
               <td style="font-weight:700;color:${profit===null?'var(--text-muted)':profit>=0?'var(--green)':'var(--red)'};">
                 ${profit === null ? '—' : (profit>=0?'+':'')+'฿'+profit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
               </td>
+              <td><button class="btn btn-danger btn-sm" onclick="removeAgent('${a.name.replace(/'/g,"\\'")}')">ลบ</button></td>
             </tr>`;
           }).join('')}
           <tr style="background:var(--bg);font-weight:700;">
@@ -1925,6 +1960,7 @@ function renderSummary() {
             <td style="color:var(--pending);">฿${totalAgentPayout.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
             <td style="color:#1a4f8a;">${agentCommission>0?'฿'+(totalAgentRevenue-totalAgentPayout).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>
             <td style="color:${agentProfit>=0?'var(--green)':'var(--red)'};">${agentCommission>0?(agentProfit>=0?'+':'')+'฿'+agentProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>
+            <td></td>
           </tr>
         </tbody>
       </table>
@@ -2083,7 +2119,7 @@ function exportExcel(period) {
   const digProfit    = digRevenue   - digCost;
 
   // ตัวแทน: นับเฉพาะ sales ที่ชื่อลูกค้าตรงกับ AGENTS list (แยกรายชื่อ)
-  const EXPORT_AGENTS = ['น้องแนน', 'มุก'];
+  const EXPORT_AGENTS = getAgentList();
 
   // คำนวณแต่ละตัวแทนแยกกัน
   const agentDetails = EXPORT_AGENTS.map(name => {
