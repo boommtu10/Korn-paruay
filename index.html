@@ -638,12 +638,10 @@ async function loadAllData() {
             paperTickets[num] = t;
           }
         });
-        // agentCommission: ใช้ค่าจาก backend ก่อน ถ้าไม่มีค้นหาจาก localStorage
-        let agentCom = parseFloat(pd.agentCommission) || 0;
-        if (!agentCom) {
-          try { agentCom = parseFloat(localStorage.getItem('agentCommission_' + nk)) || 0; } catch(_) {}
-        }
-        normalized[nk] = { ...pd, tickets: paperTickets, digitalTickets, agentCommission: agentCom };
+        // wholesale: parse ถ้าเป็น string
+        let wsData = pd.wholesale || {};
+        if (typeof wsData === 'string') { try { wsData = JSON.parse(wsData); } catch(_) { wsData = {}; } }
+        normalized[nk] = { ...pd, tickets: paperTickets, digitalTickets, wholesale: wsData };
       });
       _cache = normalized;
     } else {
@@ -1415,17 +1413,15 @@ function exportWinnerImage() {
 }
 
 // ========== PAGE 4: SUMMARY ==========
-async function saveAgentCommission(period) {
-  const val = parseFloat(document.getElementById('agent-commission-input').value) || 0;
+async function saveAgentDeduction(period) {
+  const val = parseFloat(document.getElementById('agent-deduction-input').value) || 0;
   showLoading(true);
   try {
-    const res = await api('saveConfig', { period, key: 'agentCommission', value: val });
+    const res = await api('saveConfig', { period, key: 'agentDeduction', value: val });
     if (!res.ok) { toast('บันทึกไม่สำเร็จ'); return; }
-    if (_cache[period]) _cache[period].agentCommission = val;
-    // สำรองไว้ใน localStorage เผื่อ backend ไม่ส่งกลับมาตอนโหลด
-    try { localStorage.setItem('agentCommission_' + period, String(val)); } catch(_) {}
+    if (_cache[period]) _cache[period].agentDeduction = val;
     renderSummary();
-    toast('บันทึกค่าคอมมิชชันตัวแทนแล้ว');
+    toast('บันทึกค่าตัวแทนแล้ว ✓');
   } catch(e) {
     toast('เกิดข้อผิดพลาด: ' + e.message);
   } finally {
@@ -1474,48 +1470,17 @@ async function saveWholesale(period) {
   });
   showLoading(true);
   try {
+    // ส่งเป็น object ตรงๆ ผ่าน JSON.stringify ใน payload (api() จะ encode ให้)
     const res = await api('saveConfig', { period, key: 'wholesale', value: JSON.stringify(data) });
-    if (!res.ok) { toast('บันทึกไม่สำเร็จ'); return; }
+    if (!res.ok) { toast('บันทึกไม่สำเร็จ: ' + (res.error||'')); return; }
     if (_cache[period]) _cache[period].wholesale = data;
     renderSummary();
-    toast('บันทึกข้อมูลขายส่งแล้ว');
+    toast('บันทึกข้อมูลขายส่งแล้ว ✓');
   } catch(e) {
     toast('เกิดข้อผิดพลาด: ' + e.message);
   } finally {
     showLoading(false);
   }
-}
-
-// ========== AGENT MANAGEMENT ==========
-function getAgentList() {
-  try {
-    const stored = localStorage.getItem('agentList');
-    if (stored) {
-      const arr = JSON.parse(stored);
-      if (Array.isArray(arr) && arr.length) return arr;
-    }
-  } catch(_) {}
-  return ['น้องแนน', 'มุก']; // ค่าเริ่มต้น
-}
-function saveAgentList(arr) {
-  try { localStorage.setItem('agentList', JSON.stringify(arr)); } catch(_) {}
-}
-function addAgent() {
-  const name = prompt('กรอกชื่อตัวแทนที่ต้องการเพิ่ม:');
-  if (!name || !name.trim()) return;
-  const agents = getAgentList();
-  if (agents.includes(name.trim())) { toast('มีชื่อนี้อยู่แล้ว'); return; }
-  agents.push(name.trim());
-  saveAgentList(agents);
-  renderSummary();
-  toast('เพิ่มตัวแทน "' + name.trim() + '" แล้ว');
-}
-function removeAgent(name) {
-  if (!confirm('ต้องการลบตัวแทน "' + name + '" ออกจากรายการใช่ไหม?')) return;
-  const agents = getAgentList().filter(a => a !== name);
-  saveAgentList(agents);
-  renderSummary();
-  toast('ลบตัวแทน "' + name + '" แล้ว');
 }
 
 function renderSummary() {
@@ -1608,45 +1573,12 @@ function renderSummary() {
   });
   const wsTotalProfit = wsRows.reduce((s,r) => s + r.profit, 0);
 
-  // ============ ตัวแทน ============
-  // ดึงชื่อลูกค้า paper + digital ทั้งหมด แล้วจับคู่กับตัวแทนที่กำหนดไว้
-  const AGENTS = getAgentList();
-  const agentSellPrice = 100; // ราคาขายต่อใบที่ลูกค้าจ่าย
-
-  // รวม sales ทั้งหมด (paper + digital)
-  const allSalesForAgent = Object.entries(sales);
-  // นับใบต่อลูกค้า (รวม paper เท่านั้น เพราะ digital ราคาต่างกัน)
-  // ตาม spec: "จำนวนใบที่เป็นชื่อตัวแทน * 100"
-  const agentData = AGENTS.map(name => {
-    // paper sales
-    const agentPaperSlots = paperSalesEntries.filter(([, s]) => s.customer === name);
-    const agentDigSlots   = digitalSalesEntries.filter(([, s]) => s.customer === name);
-    const paperCount = agentPaperSlots.length;
-    const digCount   = agentDigSlots.length;
-    const totalCount = paperCount + digCount;
-    const revenue    = totalCount * agentSellPrice; // ยอดขายได้
-    return { name, paperCount, digCount, totalCount, revenue };
-  });
-  // กำไรตัวแทน config (ยอดให้ตัวแทนต่อใบ) — เก็บใน config key 'agentCommission'
-  const agentCommission = parseFloat(pd.agentCommission) || 0;
-  const totalAgentRevenue = agentData.reduce((s, a) => s + a.revenue, 0);
-  const totalAgentPayout  = agentData.reduce((s, a) => s + a.totalCount * agentCommission, 0);
-  const totalAgentPaperCount = agentData.reduce((s,a) => s + a.paperCount, 0);
-  // agentProfit = กำไรคงเหลือรวมของตัวแทน (ราคาที่ตัวแทนชำระ - ต้นทุน)
-  // = revenue - payout - cost  (ใช้แสดงในตาราง)
-  const agentProfit = costPerTicket > 0
-    ? totalAgentRevenue - totalAgentPayout - (totalAgentPaperCount * costPerTicket)
-    : totalAgentRevenue - totalAgentPayout;
+  // ============ ตัวแทน (กรอกเองเป็นยอดหัก) ============
+  const agentDeduction = parseFloat(pd.agentDeduction) || 0;
 
   // ============ กำไรรวมทั้งหมด ============
-  // สูตร: แบบใบ + ดิจิตัล + ขายส่ง + กำไรคงเหลือตัวแทน
-  // paperProfit = กำไรใบทุกใบรวม (รวมของตัวแทนด้วย) คำนวณถูกต้องอยู่แล้ว
-  // agentProfit = กำไรคงเหลือตัวแทน (revenue - ค่าคอม - ต้นทุนใบ)
-  // รวมตัวแทนเฉพาะเมื่อกรอก agentCommission แล้ว ถ้ายังไม่กรอก → ไม่บวกเพิ่ม
-  const agentPartIncluded = agentCommission > 0;
-  const totalProfitAll = agentPartIncluded
-    ? (paperProfit || 0) + digProfit + wsTotalProfit + agentProfit
-    : (paperProfit || 0) + digProfit + wsTotalProfit;
+  // สูตร: แบบใบ + ดิจิตัล + ขายส่ง - ตัวแทน
+  const totalProfitAll = (paperProfit || 0) + digProfit + wsTotalProfit - agentDeduction;
 
   el.innerHTML = `
   <!-- ===== L6 แบบใบ ===== -->
@@ -1897,76 +1829,6 @@ function renderSummary() {
     </div>
   </div>
 
-  <!-- ===== ตัวแทน ===== -->
-  <div style="background:linear-gradient(135deg,#2a1a4a,#4a2a7a);padding:14px 18px;border-radius:10px;margin:16px 0 4px;display:flex;align-items:center;gap:8px;">
-    <span style="font-size:18px;">🤝</span>
-    <span style="font-size:16px;font-weight:700;color:#CC88FF;">ตัวแทน</span>
-    <button class="btn btn-sm" onclick="addAgent()" style="margin-left:auto;background:#6a2a9a;color:#fff;border:1.5px solid #CC88FF;">+ เพิ่มตัวแทน</button>
-  </div>
-
-  <div class="card" style="border-color:#cc88ff;">
-    <div class="card-title"><div class="card-title-icon" style="background:#f3e5ff;">💰</div>ค่าคอมมิชชันต่อใบ — ตัวแทน</div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-      <input type="number" id="agent-commission-input" class="form-input" style="max-width:160px;"
-        placeholder="เช่น 10" value="${agentCommission || ''}" min="0" max="200" step="0.01">
-      <span style="font-size:13px;color:var(--text-secondary);">บาท/ใบ (ยอดให้ตัวแทน)</span>
-      <button class="btn btn-sm" style="background:#6a2a9a;color:#fff;" onclick="saveAgentCommission('${period}')">บันทึก</button>
-    </div>
-  </div>
-
-  <div class="card" style="border-color:#cc88ff;">
-    <div class="card-title"><div class="card-title-icon" style="background:#f3e5ff;">👥</div>รายละเอียดตัวแทน</div>
-    <div style="overflow-x:auto;">
-      <table style="min-width:400px;">
-        <thead>
-          <tr>
-            <th>ชื่อตัวแทน</th>
-            <th>ใบ (แบบใบ)</th>
-            <th>ใบ (ดิจิตัล)</th>
-            <th>รวม</th>
-            <th>ยอดขายได้</th>
-            <th>ยอดให้ตัวแทน</th>
-            <th>ราคาที่ตัวแทนชำระ</th>
-            <th>กำไรคงเหลือ</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          ${agentData.map(a => {
-            const payout      = a.totalCount * agentCommission;
-            const netCharge   = agentCommission > 0 ? a.revenue - payout : null;
-            const cost        = a.paperCount * (costPerTicket || 0);
-            const profit      = agentCommission > 0 ? a.revenue - payout - cost : null;
-            return `<tr>
-              <td style="font-weight:700;color:#6a2a9a;">${a.name}</td>
-              <td>${a.paperCount}</td>
-              <td>${a.digCount}</td>
-              <td style="font-weight:700;">${a.totalCount} ใบ</td>
-              <td style="color:var(--green);font-weight:700;">฿${a.revenue.toLocaleString()}</td>
-              <td style="color:var(--pending);">฿${payout.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-              <td style="color:#1a4f8a;font-weight:700;">${netCharge === null ? '—' : '฿'+netCharge.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-              <td style="font-weight:700;color:${profit===null?'var(--text-muted)':profit>=0?'var(--green)':'var(--red)'};">
-                ${profit === null ? '—' : (profit>=0?'+':'')+'฿'+profit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
-              </td>
-              <td><button class="btn btn-danger btn-sm" onclick="removeAgent('${a.name.replace(/'/g,"\\'")}')">ลบ</button></td>
-            </tr>`;
-          }).join('')}
-          <tr style="background:var(--bg);font-weight:700;">
-            <td>รวม</td>
-            <td>${agentData.reduce((s,a)=>s+a.paperCount,0)}</td>
-            <td>${agentData.reduce((s,a)=>s+a.digCount,0)}</td>
-            <td>${agentData.reduce((s,a)=>s+a.totalCount,0)} ใบ</td>
-            <td style="color:var(--green);">฿${totalAgentRevenue.toLocaleString()}</td>
-            <td style="color:var(--pending);">฿${totalAgentPayout.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
-            <td style="color:#1a4f8a;">${agentCommission>0?'฿'+(totalAgentRevenue-totalAgentPayout).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>
-            <td style="color:${agentProfit>=0?'var(--green)':'var(--red)'};">${agentCommission>0?(agentProfit>=0?'+':'')+'฿'+agentProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
   <!-- ===== กำไรรวมทั้งหมด ===== -->
   <div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,#fffbef,#fff8e0);">
     <div class="card-title"><div class="card-title-icon">🏆</div>กำไรรวมทั้งหมด</div>
@@ -1983,12 +1845,17 @@ function renderSummary() {
         <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🚚 ขายส่ง</div>
         <div style="font-size:18px;font-weight:700;color:${wsTotalProfit>=0?'var(--green)':'var(--red)'};">${wsTotalProfit>=0?'+':''}฿${wsTotalProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
       </div>
-      <div style="text-align:center;padding:12px;background:#fff;border-radius:8px;border:1px solid #cc88ff;">
-        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🤝 ตัวแทน</div>
-        <div style="font-size:18px;font-weight:700;color:${agentCommission>0?(agentProfit>=0?'#6a2a9a':'var(--red)'):'var(--text-muted)'};">${agentCommission>0?(agentProfit>=0?'+':'')+'฿'+agentProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}):'—'}</div>
+      <div style="text-align:center;padding:12px;background:#fff;border-radius:8px;border:1px solid #cc88ff;grid-column:span 1;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">🤝 ตัวแทน (หัก)</div>
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
+          <input type="number" id="agent-deduction-input" class="form-input" style="max-width:100px;font-size:14px;font-weight:700;text-align:center;color:var(--red);"
+            placeholder="0" value="${agentDeduction || ''}" min="0" step="0.01">
+        </div>
+        <button class="btn btn-sm" style="background:#6a2a9a;color:#fff;margin-top:6px;width:100%;" onclick="saveAgentDeduction('${period}')">บันทึก</button>
       </div>
     </div>
     <div style="padding:16px;background:linear-gradient(135deg,#1a0a00,#3d1f00);border-radius:10px;text-align:center;">
+      <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:4px;">แบบใบ + ดิจิตัล + ขายส่ง − ตัวแทน</div>
       <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:6px;">กำไรสุทธิรวมทุกส่วน</div>
       <div style="font-size:36px;font-weight:700;color:${totalProfitAll>=0?'#FFD700':'#FF6666'};">
         ${totalProfitAll>=0?'+':''}฿${totalProfitAll.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
@@ -2051,7 +1918,7 @@ function exportExcel(period) {
 
   const costPerTicket        = pd.costPerTicket        || 0;
   const digitalCostPerTicket = pd.digitalCostPerTicket || 80;
-  const agentCommission      = pd.agentCommission       || 0;
+  const agentDeduction       = parseFloat(pd.agentDeduction) || 0;
   const sellPrice            = 100;
 
   // ===== แถวข้อมูลการขาย (รวม _2 ถ้าลูกค้าเดียวกัน) =====
@@ -2061,7 +1928,6 @@ function exportExcel(period) {
   const paperEntries = Object.entries(pd.sales || {}).filter(([k]) => !k.startsWith('DIG_'));
   const paperObj     = Object.fromEntries(paperEntries);
   const paperMergedKeys = new Set();
-  // เรียงตาม 2 ตัวท้าย
   const sortedPaperEntries = [...paperEntries].sort((a,b) => {
     const na = a[0].endsWith('_2') ? a[0].slice(0,-2) : a[0];
     const nb = b[0].endsWith('_2') ? b[0].slice(0,-2) : b[0];
@@ -2118,39 +1984,17 @@ function exportExcel(period) {
   const paperProfit  = paperRevenue - paperCost;
   const digProfit    = digRevenue   - digCost;
 
-  // ตัวแทน: นับเฉพาะ sales ที่ชื่อลูกค้าตรงกับ AGENTS list (แยกรายชื่อ)
-  const EXPORT_AGENTS = getAgentList();
-
-  // คำนวณแต่ละตัวแทนแยกกัน
-  const agentDetails = EXPORT_AGENTS.map(name => {
-    const aPaper   = paperEntries.filter(([,s]) => s.customer === name).length;
-    const aDig     = digEntries.filter(([,s]) => s.customer === name).length;
-    const aTotal   = aPaper + aDig;
-    const aSell    = aTotal * sellPrice;                     // ยอดขายได้
-    const aPayout  = aTotal * agentCommission;               // ยอดให้ตัวแทน
-    const aCost    = aPaper * costPerTicket;                 // ต้นทุนใบแบบ (ดิจิตัลไม่มีต้นทุนใบ)
-    const aNet     = aSell - aPayout - aCost;                // กำไรคงเหลือ
-    return { name, aPaper, aDig, aTotal, aSell, aPayout, aNet };
-  });
-
-  // ยอดรวมทุกตัวแทน (ใช้คำนวณ totalNet ด้านล่าง)
-  const agentPaperCount  = agentDetails.reduce((s,a) => s + a.aPaper, 0);
-  const agentDigCount    = agentDetails.reduce((s,a) => s + a.aDig,   0);
-  const agentTotal       = agentPaperCount + agentDigCount;
-  const agentPayout      = agentTotal * agentCommission;
-  const agentPaperCost   = agentPaperCount * costPerTicket;
-  const agentNetProfit   = (agentTotal * sellPrice) - agentPayout - agentPaperCost;
-
-  const ws = pd.wholesale || {};
+  let ws = pd.wholesale || {};
+  if (typeof ws === 'string') { try { ws = JSON.parse(ws); } catch(_) { ws = {}; } }
   let wsTotalProfit = 0;
   WS_PERSONS.forEach(p => {
-    const cost  = ws[p.key+'_cost']  || 0;
-    const price = ws[p.key+'_price'] || 0;
+    const cost  = parseFloat(ws[p.key+'_cost'])  || 0;
+    const price = parseFloat(ws[p.key+'_price']) || 0;
     wsTotalProfit += price - cost;
   });
 
-  // กำไรสุทธิ = รวมทุกส่วน
-  const totalNet = paperProfit + digProfit + wsTotalProfit + agentNetProfit;
+  // กำไรสุทธิ = แบบใบ + ดิจิตัล + ขายส่ง - ตัวแทน
+  const totalNet = paperProfit + digProfit + wsTotalProfit - agentDeduction;
 
   // ===== สร้าง CSV =====
   const rows = [
@@ -2165,21 +2009,17 @@ function exportExcel(period) {
     ['===== ขายส่ง ====='],
     ['ชื่อ','ราคาทุน','ราคาส่ง','กำไร'],
     ...WS_PERSONS.map(p => {
-      const c = ws[p.key+'_cost'] || 0;
-      const r = ws[p.key+'_price'] || 0;
+      const c = parseFloat(ws[p.key+'_cost'])  || 0;
+      const r = parseFloat(ws[p.key+'_price']) || 0;
       return [p.label, c, r, r - c];
     }),
     ['รวมกำไรขายส่ง','','','', wsTotalProfit],
     [],
-    ['===== ตัวแทน ====='],
-    ['ชื่อตัวแทน','ใบ (แบบใบ)','ใบ (ดิจิตัล)','รวม','ยอดขายได้','ยอดให้ตัวแทน','ราคาที่ตัวแทนชำระ','กำไรคงเหลือ'],
-    ...agentDetails.map(a => [a.name, a.aPaper, a.aDig, a.aTotal, a.aSell, a.aPayout, a.aSell - a.aPayout, a.aNet]),
-    ['รวม', agentPaperCount, agentDigCount, agentTotal,
-      agentTotal * sellPrice, agentPayout,
-      (agentTotal * sellPrice) - agentPayout, agentNetProfit],
+    ['===== ตัวแทน (หัก) ====='],
+    ['ยอดหักตัวแทน', agentDeduction],
     [],
     ['===== กำไรสุทธิรวม ====='],
-    ['กำไร L6 แบบใบ + ดิจิตัล + ขายส่ง + กำไรคงเหลือ','','','','', totalNet],
+    ['แบบใบ + ดิจิตัล + ขายส่ง − ตัวแทน','','','','', totalNet],
   ];
 
   const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
