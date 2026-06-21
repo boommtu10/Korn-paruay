@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -578,7 +579,7 @@ tr:hover td { background: var(--bg); }
 // ============================================================
 //  CONFIG — ใส่ URL Apps Script ที่ได้จาก Deploy ตรงนี้
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAVXImMfT_WnzFeuxtEHjEc_4zTBtWU577y9aRg30TZNwVe0iGw3_iRpQ8RyK6suA/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymmOH8IoFWXQm3ODev8Hfi9yM26t7aTshYdiVPmZr1sVELlw4FIJTTBRe2Vyvn3qo/exec';
 // ============================================================
 
 // ชื่อและ key ของกลุ่มขายส่ง — ใช้ร่วมกันใน renderSummary และ exportExcel
@@ -812,8 +813,12 @@ async function saveReceive() {
       if (!_cache[dateVal]) _cache[dateVal] = { tickets: {}, digitalTickets: {}, sales: {} };
       if (!_cache[dateVal].digitalTickets) _cache[dateVal].digitalTickets = {};
       pendingDigitalLottos.forEach(l => {
-        _cache[dateVal].tickets['DIG_' + l.num] = { num: 'DIG_' + l.num, copies: l.copies };
-        _cache[dateVal].digitalTickets[l.num] = { num: l.num, copies: l.copies };
+        const digKey = 'DIG_' + l.num;
+        // เลขนี้อาจมีอยู่แล้วในระบบ (ลูกค้าซื้อคนละเวลา) -> บวกเพิ่มจากของเดิม ไม่ทับค่าเดิม
+        const oldCopies = (_cache[dateVal].tickets[digKey] && _cache[dateVal].tickets[digKey].copies) || 0;
+        const newCopies = oldCopies + l.copies;
+        _cache[dateVal].tickets[digKey] = { num: digKey, copies: newCopies };
+        _cache[dateVal].digitalTickets[l.num] = { num: l.num, copies: newCopies };
       });
     }
 
