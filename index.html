@@ -566,6 +566,28 @@ tr:hover td { background: var(--bg); }
   </div>
 </div>
 
+<div id="clear-period-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🗑 ล้างข้อมูลงวด</span>
+      <button class="btn-close" onclick="document.getElementById('clear-period-modal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--red-light);border:1px solid var(--red);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--red);">
+        ข้อมูลที่ถูกล้างจะไม่สามารถกู้คืนได้ กรุณาเลือกงวดที่ต้องการล้างให้ถูกต้อง
+      </div>
+      <div class="form-group">
+        <label class="form-label">เลือกงวดที่ต้องการล้าง</label>
+        <select id="clear-period-select" class="form-select" style="font-size:15px;font-weight:600;"></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="document.getElementById('clear-period-modal').classList.remove('open')">ยกเลิก</button>
+      <button class="btn btn-danger" onclick="executeClearPeriod()">ล้างข้อมูลงวดนี้</button>
+    </div>
+  </div>
+</div>
+
 <div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9998;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
   <div style="width:48px;height:48px;border:5px solid rgba(201,168,76,0.3);border-top-color:#C9A84C;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
   <div style="color:#FFD700;font-size:14px;font-weight:600;">กำลังบันทึก...</div>
@@ -842,22 +864,33 @@ function loadPeriod() {
   toast('โหลดงวดล่าสุด: ' + formatDate(periods[0]));
 }
 
-async function confirmClearPeriod() {
-  const dateVal = document.getElementById('receive-date').value;
-  if (!dateVal) { toast('กรุณาเลือกงวดก่อน'); return; }
+function confirmClearPeriod() {
+  const periods = getAllPeriods();
+  if (!periods.length) { toast('ยังไม่มีข้อมูลงวดในระบบ'); return; }
+
+  // เติม dropdown ด้วยทุกงวดที่มีอยู่ใน sheet
+  const sel = document.getElementById('clear-period-select');
+  sel.innerHTML = '';
+  periods.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = formatDate(p) + '  (' + p + ')';
+    sel.appendChild(opt);
+  });
+
+  // ตั้งค่า default เป็นงวดที่เลือกอยู่ใน receive-date ถ้ามี
+  const current = document.getElementById('receive-date').value;
+  if (current && periods.includes(current)) sel.value = current;
+
+  document.getElementById('clear-period-modal').classList.add('open');
+}
+
+async function executeClearPeriod() {
+  const dateVal = document.getElementById('clear-period-select').value;
+  if (!dateVal) { toast('กรุณาเลือกงวด'); return; }
   const label = formatDate(dateVal);
 
-  // ขั้นพิมพ์ยืนยันวันที่งวด — ป้องกันการล้างผิดงวดเวลามีหลายงวดในระบบพร้อมกัน
-  // (ช่องวันที่นี้เป็นอิสระจากงวดที่กำลังดูอยู่ในหน้าอื่น จึงต้องบังคับให้เห็นและพิมพ์ยืนยันทุกครั้ง)
-  const typed = prompt(
-    'กำลังจะล้างข้อมูลงวด: ' + dateVal + ' (' + label + ')\n\n' +
-    'เพื่อความปลอดภัย กรุณาพิมพ์วันที่งวดนี้ให้ตรงกันทุกตัวอักษร (รูปแบบ YYYY-MM-DD)\nเช่น ' + dateVal
-  );
-  if (typed === null) return; // กดยกเลิก
-  if (typed.trim() !== dateVal) {
-    toast('วันที่ที่พิมพ์ไม่ตรงกับงวดที่เลือก ยกเลิกการล้างข้อมูลเพื่อความปลอดภัย');
-    return;
-  }
+  document.getElementById('clear-period-modal').classList.remove('open');
 
   // ยืนยัน 3 ครั้ง
   const step1 = confirm('ต้องการล้างข้อมูลงวด ' + label + ' ทั้งหมดใช่ไหม?\n\n(ล็อตเตอรี่ + การขาย + ค่าต้นทุน จะถูกลบหมด)');
