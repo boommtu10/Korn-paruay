@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -847,6 +846,18 @@ async function confirmClearPeriod() {
   const dateVal = document.getElementById('receive-date').value;
   if (!dateVal) { toast('กรุณาเลือกงวดก่อน'); return; }
   const label = formatDate(dateVal);
+
+  // ขั้นพิมพ์ยืนยันวันที่งวด — ป้องกันการล้างผิดงวดเวลามีหลายงวดในระบบพร้อมกัน
+  // (ช่องวันที่นี้เป็นอิสระจากงวดที่กำลังดูอยู่ในหน้าอื่น จึงต้องบังคับให้เห็นและพิมพ์ยืนยันทุกครั้ง)
+  const typed = prompt(
+    'กำลังจะล้างข้อมูลงวด: ' + dateVal + ' (' + label + ')\n\n' +
+    'เพื่อความปลอดภัย กรุณาพิมพ์วันที่งวดนี้ให้ตรงกันทุกตัวอักษร (รูปแบบ YYYY-MM-DD)\nเช่น ' + dateVal
+  );
+  if (typed === null) return; // กดยกเลิก
+  if (typed.trim() !== dateVal) {
+    toast('วันที่ที่พิมพ์ไม่ตรงกับงวดที่เลือก ยกเลิกการล้างข้อมูลเพื่อความปลอดภัย');
+    return;
+  }
 
   // ยืนยัน 3 ครั้ง
   const step1 = confirm('ต้องการล้างข้อมูลงวด ' + label + ' ทั้งหมดใช่ไหม?\n\n(ล็อตเตอรี่ + การขาย + ค่าต้นทุน จะถูกลบหมด)');
