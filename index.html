@@ -41,7 +41,7 @@ body { font-family: 'Sarabun', 'Noto Sans Thai', sans-serif; background: var(--b
 
 /* === HEADER === */
 .header {
-  background: linear-gradient(135deg, #1a0a00 0%, #3d1f00 50%, #1a0a00 100%);
+  background: #FF9967;
   padding: 16px 20px;
   display: flex; align-items: center; justify-content: space-between;
   border-bottom: 3px solid var(--gold);
@@ -51,20 +51,20 @@ body { font-family: 'Sarabun', 'Noto Sans Thai', sans-serif; background: var(--b
 .header-logo {
   width: 40px; height: 40px; background: var(--gold);
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
-  font-size: 20px; font-weight: 700; color: #1a0a00;
+  font-size: 20px; font-weight: 700; color: #000000;
 }
-.header-title { color: var(--gold); font-size: 18px; font-weight: 700; line-height: 1.2; }
-.header-sub { color: var(--text-muted); font-size: 12px; }
+.header-title { color: #000000; font-size: 18px; font-weight: 700; line-height: 1.2; }
+.header-sub { color: #000000; font-size: 12px; }
 
 /* === NAV === */
-.nav { display: flex; background: #2c1000; border-bottom: 2px solid var(--gold); overflow-x: auto; }
+.nav { display: flex; background: #FF9967; border-bottom: 2px solid var(--gold); overflow-x: auto; }
 .nav-btn {
   flex: 1; min-width: 80px; padding: 12px 8px; border: none; background: none;
-  color: var(--text-muted); font-family: inherit; font-size: 13px; font-weight: 500;
+  color: #000000; font-family: inherit; font-size: 13px; font-weight: 500;
   cursor: pointer; transition: all 0.2s; white-space: nowrap; border-bottom: 3px solid transparent;
 }
-.nav-btn:hover { color: var(--gold-light); background: rgba(201,168,76,0.08); }
-.nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(201,168,76,0.12); }
+.nav-btn:hover { color: #000000; background: rgba(0,0,0,0.10); }
+.nav-btn.active { color: #000000; border-bottom-color: #000000; background: rgba(0,0,0,0.15); }
 
 /* === PAGES === */
 .page { display: none; padding: 20px; max-width: 900px; margin: 0 auto; }
@@ -294,7 +294,7 @@ tr:hover td { background: var(--bg); }
       <div class="header-sub">ระบบจัดการร้านล็อตเตอรี่</div>
     </div>
   </div>
-  <div id="header-period" style="color:var(--gold-light);font-size:13px;text-align:right;"></div>
+  <div id="header-period" style="color:#000000;font-size:13px;text-align:right;"></div>
 </div>
 
 <nav class="nav">
