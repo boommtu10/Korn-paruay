@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#3d1f00">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="เสี่ยกร พารวย">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>เสี่ยกร พารวย</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #C9A84C;
+  --gold-light: #F5E6B3;
+  --gold-dark: #8A6A1E;
+  --red: #B5151B;
+  --red-light: #FDECEA;
+  --green: #1A7A3C;
+  --green-light: #E6F4ED;
+  --blue: #1A4F8A;
+  --blue-light: #E6EFF9;
+  --bg: #FDF8EE;
+  --surface: #FFFFFF;
+  --border: #E8D9A0;
+  --text: #2C1F08;
+  --text-secondary: #7A6035;
+  --text-muted: #B0955A;
+  --pending: #D97706;
+  --pending-bg: #FEF3C7;
+  --paid: #059669;
+  --paid-bg: #D1FAE5;
+  --radius: 10px;
+  --shadow: 0 2px 8px rgba(44,31,8,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Sarabun', 'Noto Sans Thai', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* === HEADER === */
+.header {
+  background: #FF9967;
+  padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 3px solid var(--gold);
+  position: sticky; top: 0; z-index: 100;
+}
+.header-brand { display: flex; align-items: center; gap: 10px; }
+.header-logo {
+  width: 40px; height: 40px; background: var(--gold);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700; color: #000000;
+}
+.header-title { color: #000000; font-size: 18px; font-weight: 700; line-height: 1.2; }
+.header-sub { color: #000000; font-size: 12px; }
+
+/* === NAV === */
+.nav { display: flex; background: #FF9967; border-bottom: 2px solid var(--gold); overflow-x: auto; }
+.nav-btn {
+  flex: 1; min-width: 80px; padding: 12px 8px; border: none; background: none;
+  color: #000000; font-family: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap; border-bottom: 3px solid transparent;
+}
+.nav-btn:hover { color: #000000; background: rgba(0,0,0,0.10); }
+.nav-btn.active { color: #000000; border-bottom-color: #000000; background: rgba(0,0,0,0.15); }
+
+/* === PAGES === */
+.page { display: none; padding: 20px; max-width: 900px; margin: 0 auto; }
+.page.active { display: block; }
+
+/* === CARDS === */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.card-title {
+  font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 16px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title-icon {
+  width: 28px; height: 28px; background: var(--gold-light);
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+
+/* === FORMS === */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-row.single { grid-template-columns: 1fr; }
+.form-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+@media (max-width: 600px) {
+  .form-row { grid-template-columns: 1fr; }
+  .form-row.triple { grid-template-columns: 1fr 1fr; }
+}
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.form-input, .form-select {
+  padding: 10px 12px; border: 1.5px solid var(--border);
+  border-radius: 8px; font-family: inherit; font-size: 14px; color: var(--text);
+  background: var(--surface); transition: border-color 0.2s;
+  width: 100%;
+}
+.form-input:focus, .form-select:focus {
+  outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+}
+.form-input.lotto-input { font-size: 22px; font-weight: 700; letter-spacing: 6px; text-align: center; }
+
+/* === BUTTONS === */
+.btn {
+  padding: 10px 20px; border-radius: 8px; border: none;
+  font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-gold {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: #1a0a00;
+}
+.btn-gold:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.btn-outline {
+  background: none; border: 1.5px solid var(--border);
+  color: var(--text-secondary);
+}
+.btn-outline:hover { border-color: var(--gold); color: var(--gold-dark); }
+.btn-danger { background: var(--red); color: #fff; }
+.btn-danger:hover { background: #8B1015; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover { background: #155a2d; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* === LOTTERY GRID === */
+.lottery-input-row {
+  display: grid; grid-template-columns: 1fr auto auto auto;
+  gap: 8px; align-items: end; margin-bottom: 8px;
+}
+@media (max-width: 600px) {
+  .lottery-input-row { grid-template-columns: 1fr 1fr; }
+  .lottery-input-row .lotto-num { grid-column: 1 / -1; }
+}
+.lotto-list { margin-top: 12px; }
+.lotto-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; background: var(--bg); border-radius: 8px;
+  margin-bottom: 6px; border: 1px solid var(--border);
+}
+.lotto-num-badge {
+  font-size: 18px; font-weight: 700; letter-spacing: 4px;
+  color: var(--red); background: var(--red-light);
+  padding: 4px 12px; border-radius: 6px;
+}
+.lotto-count-badge {
+  font-size: 12px; color: var(--text-secondary);
+  background: var(--gold-light); padding: 3px 8px; border-radius: 20px;
+}
+
+/* === NUMBER GRID === */
+.search-bar {
+  display: flex; gap: 8px; margin-bottom: 16px;
+}
+.search-bar input { flex: 1; }
+.number-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+}
+.num-cell {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 10px 6px;
+  text-align: center; cursor: pointer; transition: all 0.15s;
+  position: relative; overflow: hidden;
+}
+.num-cell:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: var(--shadow); }
+.num-cell .num { font-size: 16px; font-weight: 700; color: var(--red); letter-spacing: 2px; }
+.num-cell .copies { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.num-cell.sold { background: #F5F5F5; cursor: not-allowed; border-color: #DDD; }
+.num-cell.sold .num { color: #AAA; }
+.num-cell.pending { background: var(--pending-bg); border-color: var(--pending); }
+.num-cell.pending .num { color: var(--pending); }
+.num-cell.paid { background: var(--paid-bg); border-color: var(--paid); cursor: not-allowed; }
+.num-cell.paid .num { color: var(--paid); }
+.num-cell.partial { background: #FFF7E6; border-color: #F59E0B; }
+
+.status-stamp {
+  font-size: 9px; font-weight: 700;
+  padding: 2px 6px; border-radius: 4px; margin-top: 4px;
+  display: inline-block;
+}
+.stamp-pending { background: var(--pending); color: #fff; }
+.stamp-paid { background: var(--paid); color: #fff; }
+.stamp-partial { background: #F59E0B; color: #fff; }
+
+/* === MODAL === */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55); z-index: 1000;
+  align-items: center; justify-content: center; padding: 16px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border-radius: 14px;
+  width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  border-top: 4px solid var(--gold);
+}
+.modal-header {
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 17px; font-weight: 700; }
+.modal-body { padding: 20px; }
+.modal-footer {
+  padding: 12px 20px 20px;
+  display: flex; gap: 8px; justify-content: flex-end;
+}
+.modal-num { font-size: 32px; font-weight: 700; letter-spacing: 6px; color: var(--red); text-align: center; margin-bottom: 16px; }
+.btn-close { background: none; border: none; cursor: pointer; font-size: 20px; color: var(--text-secondary); padding: 4px; }
+
+/* === REWARD PAGE === */
+.reward-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 600px) { .reward-form { grid-template-columns: 1fr; } }
+.reward-input-group { display: flex; flex-direction: column; gap: 6px; }
+.reward-label { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.result-list { margin-top: 16px; }
+.result-item { display:flex; align-items:center; justify-content:space-between; padding:16px 18px; border-radius:12px; margin-bottom:10px; border:2px solid; }
+.result-item.r1  { background:linear-gradient(135deg,#FFF8E1,#FFF3CC); border-color:#C9A84C; box-shadow:0 4px 16px rgba(201,168,76,0.2); }
+.result-item.r3f { background:linear-gradient(135deg,#E8F5E9,#D4EDDA); border-color:#2E7D32; }
+.result-item.r3b { background:linear-gradient(135deg,#E3F2FD,#CCE5FF); border-color:#1565C0; }
+.result-item.r2  { background:linear-gradient(135deg,#F3E5F5,#EDD5F5); border-color:#7B1FA2; }
+.result-num { font-size: 20px; font-weight: 700; letter-spacing: 4px; }
+.result-prize { font-size: 14px; font-weight: 600; }
+.result-customer { font-size: 12px; color: var(--text-secondary); }
+
+/* === SUMMARY === */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px; text-align: center;
+}
+.stat-val { font-size: 28px; font-weight: 700; color: var(--red); }
+.stat-label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.stat-card.green .stat-val { color: var(--green); }
+.stat-card.gold .stat-val { color: var(--gold-dark); }
+.stat-card.blue .stat-val { color: var(--blue); }
+
+/* === TOAST === */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: #1a0a00; color: var(--gold); padding: 12px 24px;
+  border-radius: 30px; font-size: 14px; font-weight: 600;
+  z-index: 9999; transition: transform 0.3s; border: 1px solid var(--gold);
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* === TABLES === */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: var(--bg); padding: 10px 12px; text-align: left; font-weight: 700; color: var(--text-secondary); border-bottom: 2px solid var(--border); white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:hover td { background: var(--bg); }
+
+/* === BADGES === */
+.badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+.badge-pending { background: var(--pending-bg); color: var(--pending); }
+.badge-paid { background: var(--paid-bg); color: var(--paid); }
+.badge-available { background: var(--green-light); color: var(--green); }
+
+/* === PERIOD SELECTOR === */
+.period-bar {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 12px 16px;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.period-label { font-size: 13px; font-weight: 700; color: var(--text-secondary); }
+.period-select { padding: 6px 12px; border: 1.5px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 13px; background: var(--bg); cursor: pointer; }
+
+/* Progress bar */
+.progress-bar { background: #EEE; border-radius: 20px; height: 8px; overflow: hidden; margin-top: 6px; }
+.progress-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--gold) 0%, var(--red) 100%); transition: width 0.4s; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">
+    <div class="header-logo">🍀</div>
+    <div>
+      <div class="header-title">เสี่ยกร พารวย</div>
+      <div class="header-sub">ระบบจัดการร้านล็อตเตอรี่</div>
+    </div>
+  </div>
+  <div id="header-period" style="color:#000000;font-size:13px;text-align:right;"></div>
+</div>
+
+<nav class="nav">
+  <button class="nav-btn active" onclick="showPage('receive')">📥 รับล็อตเตอรี่</button>
+  <button class="nav-btn" onclick="showPage('sell')">🏷️ การจำหน่าย</button>
+  <button class="nav-btn" onclick="showPage('reward')">🏆 ตรวจรางวัล</button>
+  <button class="nav-btn" onclick="showPage('summary')">📊 สรุป</button>
+</nav>
+
+<!-- ===== PAGE 1: รับล็อตเตอรี่ ===== -->
+<div id="page-receive" class="page active">
+  <div class="card">
+    <div class="card-title"><div class="card-title-icon">📅</div>งวดประจำวันที่</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">งวดวันที่</label>
+        <input type="date" id="receive-date" class="form-input">
+      </div>
+      <div class="form-group" style="justify-content:flex-end;">
+        <label class="form-label">&nbsp;</label>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" onclick="loadPeriod()">โหลดงวดที่มีอยู่</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmClearPeriod()">🗑 ล้างงวดนี้</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><div class="card-title-icon">🎫</div>เพิ่มชุดตัวเลข</div>
+
+    <!-- L6 แบบใบ -->
+    <div style="background:var(--gold-light);border-radius:8px;padding:12px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--gold-dark);margin-bottom:10px;">🎟 L6 แบบใบ (ขายหน้าบ้าน)</div>
+      <div class="lottery-input-row">
+        <div class="form-group lotto-num">
+          <label class="form-label">L6 แบบใบ</label>
+          <input type="text" id="num-input" class="form-input lotto-input" maxlength="6" placeholder="000000" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+        <div class="form-group">
+          <label class="form-label">จำนวนชุด</label>
+          <select id="copies-input" class="form-select">
+            <option value="2">2 ใบ</option>
+            <option value="1">1 ใบ</option>
+          </select>
+        </div>
+        <div class="form-group" style="justify-content:flex-end;">
+          <label class="form-label">&nbsp;</label>
+          <button class="btn btn-outline" onclick="addLottoToList()">+ เพิ่ม</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- L6 ดิจิตัล -->
+    <div style="background:#e8f0fe;border-radius:8px;padding:12px;margin-bottom:14px;border:1px solid #a8c4f5;">
+      <div style="font-size:13px;font-weight:700;color:#1a4f8a;margin-bottom:10px;">💻 L6 ดิจิตัล (ขายในระบบ)</div>
+      <div class="lottery-input-row">
+        <div class="form-group lotto-num">
+          <label class="form-label">L6 ดิจิตัล</label>
+          <input type="text" id="digital-num-input" class="form-input lotto-input" maxlength="6" placeholder="000000" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+        <div class="form-group">
+          <label class="form-label">จำนวนใบ</label>
+          <input type="number" id="digital-copies-input" class="form-input" min="1" max="999" value="1" placeholder="จำนวนใบ" style="text-align:center;font-size:15px;font-weight:700;">
+        </div>
+        <div class="form-group" style="justify-content:flex-end;">
+          <label class="form-label">&nbsp;</label>
+          <button class="btn btn-outline" onclick="addDigitalLottoToList()">+ เพิ่ม</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="lotto-list" class="lotto-list"></div>
+    <div id="receive-summary" style="display:none;background:var(--bg);padding:12px;border-radius:8px;margin-top:12px;font-size:13px;color:var(--text-secondary);"></div>
+    <div style="margin-top:16px;display:flex;gap:8px;">
+      <button class="btn btn-outline" onclick="clearLottoList()">🗑 ล้างรายการ</button>
+      <button class="btn btn-gold" style="flex:1;justify-content:center;" onclick="saveReceive()">💾 บันทึกทั้งหมด</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 2: จำหน่าย ===== -->
+<div id="page-sell" class="page">
+  <div class="period-bar">
+    <span class="period-label">งวด:</span>
+    <select id="sell-period" class="period-select" onchange="renderSellGrid()">
+      <option value="">-- เลือกงวด --</option>
+    </select>
+    <div style="margin-left:auto;display:flex;gap:8px;">
+      <span id="sell-stats" style="font-size:12px;color:var(--text-secondary);"></span>
+    </div>
+  </div>
+  <div class="card" style="padding:16px;">
+    <div class="search-bar">
+      <input type="text" id="sell-search" class="form-input" placeholder="🔍 ค้นหาเลข..." oninput="renderSellGrid()" maxlength="6">
+      <select id="sell-filter" class="form-select" style="width:140px;" onchange="renderSellGrid()">
+        <option value="">ทั้งหมด</option>
+        <option value="available">ว่างอยู่</option>
+        <option value="pending">รอชำระ</option>
+        <option value="paid">ชำระแล้ว</option>
+      </select>
+    </div>
+    <div id="sell-grid" style="width:100%;"></div>
+  </div>
+</div>
+
+<!-- ===== PAGE 3: ตรวจรางวัล ===== -->
+<div id="page-reward" class="page">
+  <div class="period-bar">
+    <span class="period-label">งวด:</span>
+    <select id="reward-period" class="period-select">
+      <option value="">-- เลือกงวด --</option>
+    </select>
+  </div>
+
+  <!-- กรอกผลรางวัล -->
+  <div class="card">
+    <div class="card-title"><div class="card-title-icon">🏆</div>ผลรางวัล</div>
+
+    <!-- รางวัลที่ 1 -->
+    <div style="background:var(--gold-light);border-radius:8px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--gold-dark);margin-bottom:10px;text-align:center;">รางวัลที่ 1</div>
+      <input type="text" id="r1" class="form-input lotto-input" style="font-size:26px;" maxlength="6" placeholder="______" oninput="this.value=this.value.replace(/\D/g,'')">
+    </div>
+
+    <!-- 3 ตัวหน้า -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;">เลข 3 ตัวหน้า</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div class="reward-label" style="margin-bottom:4px;">ชุดที่ 1</div>
+          <input type="text" id="r3f" class="form-input" style="font-size:22px;font-weight:700;letter-spacing:6px;text-align:center;" maxlength="3" placeholder="___" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+        <div>
+          <div class="reward-label" style="margin-bottom:4px;">ชุดที่ 2</div>
+          <input type="text" id="r3f2" class="form-input" style="font-size:22px;font-weight:700;letter-spacing:6px;text-align:center;" maxlength="3" placeholder="___" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+      </div>
+    </div>
+
+    <!-- 3 ตัวหลัง -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;">เลข 3 ตัวหลัง</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div>
+          <div class="reward-label" style="margin-bottom:4px;">ชุดที่ 1</div>
+          <input type="text" id="r3b" class="form-input" style="font-size:22px;font-weight:700;letter-spacing:6px;text-align:center;" maxlength="3" placeholder="___" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+        <div>
+          <div class="reward-label" style="margin-bottom:4px;">ชุดที่ 2</div>
+          <input type="text" id="r3b2" class="form-input" style="font-size:22px;font-weight:700;letter-spacing:6px;text-align:center;" maxlength="3" placeholder="___" oninput="this.value=this.value.replace(/\D/g,'')">
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 ตัวล่าง -->
+    <div style="margin-bottom:16px;">
+      <div style="font-size:13px;font-weight:700;color:var(--text-secondary);margin-bottom:8px;">เลข 2 ตัวล่าง</div>
+      <input type="text" id="r2" class="form-input" style="font-size:22px;font-weight:700;letter-spacing:6px;text-align:center;" maxlength="2" placeholder="__" oninput="this.value=this.value.replace(/\D/g,'')">
+    </div>
+
+    <!-- hidden inputs ที่ยังต้องใช้ใน checkReward() -->
+    <input type="hidden" id="rn1a"><input type="hidden" id="rn1b">
+    <input type="hidden" id="r2nd"><input type="hidden" id="r3rd">
+    <input type="hidden" id="r4"><input type="hidden" id="r5">
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn btn-outline" onclick="clearRewardFields()">🗑 ล้างเลข</button>
+      <button class="btn btn-gold" style="flex:1;justify-content:center;" onclick="checkReward()">🔍 ตรวจรางวัล</button>
+    </div>
+  </div>
+  <div id="reward-results"></div>
+</div>
+
+<!-- ===== PAGE 4: สรุป ===== -->
+<div id="page-summary" class="page">
+  <div class="period-bar">
+    <span class="period-label">งวด:</span>
+    <select id="summary-period" class="period-select" onchange="renderSummary()">
+      <option value="">-- เลือกงวด --</option>
+    </select>
+  </div>
+  <div id="summary-content"></div>
+</div>
+
+<!-- ===== MODAL: บันทึกการขาย ===== -->
+<div id="sell-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📝 บันทึกการขาย</span>
+      <button class="btn-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="modal-num" class="modal-num"></div>
+      <input type="hidden" id="modal-number">
+      <input type="hidden" id="modal-period">
+      <div class="form-row">
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">ชื่อลูกค้า</label>
+          <input type="text" id="modal-customer" class="form-input" placeholder="กรอกชื่อ-นามสกุล">
+        </div>
+      </div>
+      <div class="form-row triple">
+        <div class="form-group">
+          <label class="form-label">ช่องทาง</label>
+          <select id="modal-channel" class="form-select">
+            <option>หน้าบ้าน</option>
+            <option>Facebook</option>
+            <option>Line</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">จำนวนใบ</label>
+          <select id="modal-qty" class="form-select">
+            <option value="2">2 ใบ</option>
+            <option value="1">1 ใบ</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">การชำระ</label>
+          <select id="modal-payment" class="form-select">
+            <option>เงินสด</option>
+            <option>โอน</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">สถานะการชำระ</label>
+          <select id="modal-status" class="form-select">
+            <option value="pending">รอชำระ</option>
+            <option value="paid">ชำระแล้ว</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">วันที่ชำระ (ไม่บังคับ)</label>
+          <input type="date" id="modal-paydate" class="form-input">
+        </div>
+      </div>
+      <div id="modal-copies-info" style="display:none;background:var(--pending-bg);padding:10px;border-radius:8px;font-size:13px;color:var(--pending);margin-top:4px;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-gold" onclick="saveSale()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: Export Winner ===== -->
+<div id="winner-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🎉 ยินดีด้วย!</span>
+      <button class="btn-close" onclick="document.getElementById('winner-modal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="winner-card" style="background:linear-gradient(135deg,#1a0a00,#3d1f00);padding:28px;border-radius:12px;text-align:center;border:2px solid var(--gold);">
+        <div style="font-size:40px;margin-bottom:8px;">🍀</div>
+        <div style="font-size:13px;letter-spacing:1px;color:rgba(255,255,255,0.6);">ร้านเสี่ยกร พารวย</div>
+        <div id="winner-name" style="font-size:22px;font-weight:700;margin:12px 0;color:#FFD700;"></div>
+        <div id="winner-prize-text" style="font-size:16px;margin-bottom:8px;color:#F5C842;"></div>
+        <div id="winner-amount" style="font-size:32px;font-weight:700;color:#FFD700;"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="document.getElementById('winner-modal').classList.remove('open')">ปิด</button>
+      <button class="btn btn-gold" onclick="exportWinnerImage()">📸 บันทึกรูป</button>
+    </div>
+  </div>
+</div>
+
+<div id="clear-period-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🗑 ล้างข้อมูลงวด</span>
+      <button class="btn-close" onclick="document.getElementById('clear-period-modal').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--red-light);border:1px solid var(--red);border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--red);">
+        ข้อมูลที่ถูกล้างจะไม่สามารถกู้คืนได้ กรุณาเลือกงวดที่ต้องการล้างให้ถูกต้อง
+      </div>
+      <div class="form-group">
+        <label class="form-label">เลือกงวดที่ต้องการล้าง</label>
+        <select id="clear-period-select" class="form-select" style="font-size:15px;font-weight:600;"></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="document.getElementById('clear-period-modal').classList.remove('open')">ยกเลิก</button>
+      <button class="btn btn-danger" onclick="executeClearPeriod()">ล้างข้อมูลงวดนี้</button>
+    </div>
+  </div>
+</div>
+
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:9998;align-items:center;justify-content:center;flex-direction:column;gap:12px;">
+  <div style="width:48px;height:48px;border:5px solid rgba(201,168,76,0.3);border-top-color:#C9A84C;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+  <div style="color:#FFD700;font-size:14px;font-weight:600;">กำลังบันทึก...</div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<div id="toast" class="toast"></div>
+
+<script>
+// ============================================================
+//  CONFIG — ใส่ URL Apps Script ที่ได้จาก Deploy ตรงนี้
+// ============================================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbymmOH8IoFWXQm3ODev8Hfi9yM26t7aTshYdiVPmZr1sVELlw4FIJTTBRe2Vyvn3qo/exec';
+// ============================================================
+
+// ชื่อและ key ของกลุ่มขายส่ง — ใช้ร่วมกันใน renderSummary และ exportExcel
+const WS_PERSONS = [
+  { key: 'mae',    label: 'แม่' },
+  { key: 'oom',    label: 'อ้อม' },
+  { key: 'padpee', label: 'พี่ปัด' },
+];
+
+// ========== DATA LAYER ==========
+// cache ใน memory ระหว่างเปิดหน้า (ไม่ใช้ localStorage อีกต่อไป)
+let _cache = null;
+
+async function api(action, body = {}) {
+  // ใช้ GET + query string เพื่อหลีกเลี่ยง CORS preflight
+  // Google Apps Script รองรับ doGet และไม่ต้องการ preflight สำหรับ simple request
+  const url = SCRIPT_URL
+    + '?action=' + encodeURIComponent(action)
+    + '&payload=' + encodeURIComponent(JSON.stringify(body));
+  const resp = await fetch(url);
+  return resp.json();
+}
+
+// แปลง period key ใดๆ ให้เป็น YYYY-MM-DD เสมอ
+function normalizePeriodKey(k) {
+  if (!k) return k;
+  // ถ้าเป็น ISO แล้ว (2026-06-16) คืนเลย
+  if (/^\d{4}-\d{2}-\d{2}$/.test(k)) return k;
+  // ถ้าเป็น date string แบบอื่น ลอง parse
+  const d = new Date(k);
+  if (!isNaN(d.getTime())) {
+    return d.getFullYear() + '-'
+      + String(d.getMonth()+1).padStart(2,'0') + '-'
+      + String(d.getDate()).padStart(2,'0');
+  }
+  return k; // ถ้า parse ไม่ได้ คืนเดิม
+}
+
+async function loadAllData() {
+  showLoading(true);
+  try {
+    const res = await api('getAllData');
+    if (res.ok) {
+      const raw = res.data || {};
+      const normalized = {};
+      Object.keys(raw).forEach(k => {
+        const nk = normalizePeriodKey(k);
+        const pd = raw[k];
+        // แยก digitalTickets ออกจาก tickets (key ที่ขึ้นต้น DIG_)
+        const paperTickets = {};
+        const digitalTickets = {};
+        Object.entries(pd.tickets || {}).forEach(([num, t]) => {
+          if (num.startsWith('DIG_')) {
+            const realNum = num.slice(4);
+            digitalTickets[realNum] = { ...t, num: realNum };
+          } else {
+            paperTickets[num] = t;
+          }
+        });
+        // wholesale: parse ถ้าเป็น string
+        let wsData = pd.wholesale || {};
+        if (typeof wsData === 'string') { try { wsData = JSON.parse(wsData); } catch(_) { wsData = {}; } }
+        normalized[nk] = { ...pd, tickets: paperTickets, digitalTickets, wholesale: wsData };
+      });
+      _cache = normalized;
+    } else {
+      alert('โหลดข้อมูลไม่ได้: ' + (res.error || ''));
+      _cache = {};
+    }
+  } catch(e) {
+    alert('เชื่อมต่อ Google Sheets ไม่ได้ กรุณาตรวจสอบ SCRIPT_URL');
+    _cache = {};
+  } finally {
+    showLoading(false);
+  }
+}
+
+function getData()      { return _cache || {}; }
+function getCacheOrEmpty(period) {
+  if (!_cache[period]) _cache[period] = { tickets: {}, digitalTickets: {}, sales: {} };
+  if (!_cache[period].digitalTickets) _cache[period].digitalTickets = {};
+  return _cache[period];
+}
+
+function showLoading(on) {
+  document.getElementById('loading-overlay').style.display = on ? 'flex' : 'none';
+}
+
+// ========== NAVIGATION ==========
+function showPage(id, noEvent) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (!noEvent && event?.target) event.target.classList.add('active');
+  if (id === 'sell')    { populatePeriodSelects(); renderSellGrid(); }
+  if (id === 'reward')  { populatePeriodSelects(); }
+  if (id === 'summary') { populatePeriodSelects(); renderSummary(); }
+}
+
+// ========== UTILS ==========
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+function formatDate(d) {
+  if (!d) return '';
+  const p = d.split('-');
+  if (p.length !== 3) return d;
+  const buddhistYear = (parseInt(p[0]) + 543).toString().slice(-2);
+  return p[2] + '/' + p[1] + '/' + buddhistYear;
+}
+
+// ========== PERIOD ==========
+function getAllPeriods() {
+  const d = getData();
+  return Object.keys(d).sort().reverse();
+}
+function populatePeriodSelects() {
+  const periods = getAllPeriods();
+  ['sell-period','reward-period','summary-period'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">-- เลือกงวด --</option>';
+    periods.forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p; opt.textContent = formatDate(p);
+      sel.appendChild(opt);
+    });
+    if (cur) sel.value = cur;
+    if (!sel.value && periods.length) sel.value = periods[0];
+  });
+}
+
+// ========== PAGE 1: RECEIVE ==========
+let pendingLottos = [];         // L6 แบบใบ
+let pendingDigitalLottos = [];  // L6 ดิจิตัล
+
+function addLottoToList() {
+  const raw = document.getElementById('num-input').value.trim();
+  const copies = parseInt(document.getElementById('copies-input').value);
+  if (!raw || raw.length < 1 || raw.length > 6) { toast('กรุณากรอกเลข 1-6 หลัก'); return; }
+  const num = raw.padStart(6, '0');
+  if (pendingLottos.find(l => l.num === num)) { toast('เลขนี้มีอยู่แล้ว'); return; }
+  pendingLottos.push({ num, copies, type: 'paper' });
+  document.getElementById('num-input').value = '';
+  document.getElementById('copies-input').value = '1';
+  renderLottoList();
+  document.getElementById('num-input').focus();
+}
+document.getElementById('num-input').addEventListener('keydown', e => { if (e.key === 'Enter') addLottoToList(); });
+
+function addDigitalLottoToList() {
+  const raw = document.getElementById('digital-num-input').value.trim();
+  const copies = parseInt(document.getElementById('digital-copies-input').value) || 1;
+  if (!raw || raw.length < 1 || raw.length > 6) { toast('กรุณากรอกเลข 1-6 หลัก'); return; }
+  if (copies < 1) { toast('กรุณากรอกจำนวนใบอย่างน้อย 1 ใบ'); return; }
+  const num = raw.padStart(6, '0');
+  // ใช้ prefix 'D' เก็บแยกใน pendingDigitalLottos
+  if (pendingDigitalLottos.find(l => l.num === num)) { toast('เลขนี้มีอยู่แล้วใน L6 ดิจิตัล'); return; }
+  pendingDigitalLottos.push({ num, copies, type: 'digital' });
+  document.getElementById('digital-num-input').value = '';
+  document.getElementById('digital-copies-input').value = '1';
+  renderLottoList();
+  document.getElementById('digital-num-input').focus();
+}
+document.getElementById('digital-num-input').addEventListener('keydown', e => { if (e.key === 'Enter') addDigitalLottoToList(); });
+
+function renderLottoList() {
+  const list = document.getElementById('lotto-list');
+  const sumEl = document.getElementById('receive-summary');
+  const hasAny = pendingLottos.length || pendingDigitalLottos.length;
+  if (!hasAny) { list.innerHTML = ''; sumEl.style.display = 'none'; return; }
+
+  let html = '';
+  if (pendingLottos.length) {
+    html += `<div style="font-size:12px;font-weight:700;color:var(--gold-dark);margin:8px 0 4px;">🎟 L6 แบบใบ</div>`;
+    html += pendingLottos.map((l, i) => `
+      <div class="lotto-item">
+        <span class="lotto-num-badge">${l.num}</span>
+        <span class="lotto-count-badge">${l.copies === 2 ? '2 ใบ' : '1 ใบ'}</span>
+        <button class="btn btn-outline btn-sm" onclick="removeLotto(${i})">✕</button>
+      </div>`).join('');
+  }
+  if (pendingDigitalLottos.length) {
+    html += `<div style="font-size:12px;font-weight:700;color:#1a4f8a;margin:10px 0 4px;">💻 L6 ดิจิตัล</div>`;
+    html += pendingDigitalLottos.map((l, i) => `
+      <div class="lotto-item" style="border-color:#a8c4f5;">
+        <span class="lotto-num-badge" style="background:#e8f0fe;color:#1a4f8a;">${l.num}</span>
+        <span class="lotto-count-badge">${l.copies} ใบ</span>
+        <button class="btn btn-outline btn-sm" onclick="removeDigitalLotto(${i})">✕</button>
+      </div>`).join('');
+  }
+  list.innerHTML = html;
+
+  const totalPaper   = pendingLottos.reduce((s,l) => s + l.copies, 0);
+  const totalDigital = pendingDigitalLottos.reduce((s,l) => s + l.copies, 0);
+  sumEl.style.display = 'block';
+  sumEl.innerHTML = `
+    🎟 L6 แบบใบ: <strong>${pendingLottos.length} เลข (${totalPaper} ใบ)</strong>
+    &nbsp;|&nbsp;
+    💻 L6 ดิจิตัล: <strong>${pendingDigitalLottos.length} เลข (${totalDigital} ใบ)</strong>`;
+}
+
+function removeLotto(i) { pendingLottos.splice(i,1); renderLottoList(); }
+function removeDigitalLotto(i) { pendingDigitalLottos.splice(i,1); renderLottoList(); }
+function clearLottoList() { pendingLottos = []; pendingDigitalLottos = []; renderLottoList(); }
+
+async function saveReceive() {
+  const dateVal = document.getElementById('receive-date').value;
+  if (!dateVal) { toast('กรุณาเลือกงวดวันที่'); return; }
+  if (!pendingLottos.length && !pendingDigitalLottos.length) { toast('ยังไม่มีชุดตัวเลข'); return; }
+
+  showLoading(true);
+  try {
+    // บันทึก L6 แบบใบ (เหมือนเดิม)
+    if (pendingLottos.length) {
+      const res = await api('saveTickets', { period: dateVal, tickets: pendingLottos });
+      if (!res.ok) { toast('บันทึก L6 แบบใบไม่สำเร็จ: ' + res.error); return; }
+      if (!_cache[dateVal]) _cache[dateVal] = { tickets: {}, digitalTickets: {}, sales: {} };
+      pendingLottos.forEach(l => {
+        _cache[dateVal].tickets[l.num] = { num: l.num, copies: l.copies };
+      });
+    }
+    // บันทึก L6 ดิจิตัล (ใช้ prefix 'DIG_' ใน key ของ tickets เก็บใน digitalTickets)
+    if (pendingDigitalLottos.length) {
+      const digitalTickets = pendingDigitalLottos.map(l => ({ num: 'DIG_' + l.num, copies: l.copies }));
+      const res2 = await api('saveTickets', { period: dateVal, tickets: digitalTickets });
+      if (!res2.ok) { toast('บันทึก L6 ดิจิตัลไม่สำเร็จ: ' + res2.error); return; }
+      if (!_cache[dateVal]) _cache[dateVal] = { tickets: {}, digitalTickets: {}, sales: {} };
+      if (!_cache[dateVal].digitalTickets) _cache[dateVal].digitalTickets = {};
+      pendingDigitalLottos.forEach(l => {
+        const digKey = 'DIG_' + l.num;
+        // เลขนี้อาจมีอยู่แล้วในระบบ (ลูกค้าซื้อคนละเวลา) -> บวกเพิ่มจากของเดิม ไม่ทับค่าเดิม
+        const oldCopies = (_cache[dateVal].tickets[digKey] && _cache[dateVal].tickets[digKey].copies) || 0;
+        const newCopies = oldCopies + l.copies;
+        _cache[dateVal].tickets[digKey] = { num: digKey, copies: newCopies };
+        _cache[dateVal].digitalTickets[l.num] = { num: l.num, copies: newCopies };
+      });
+    }
+
+    const total = pendingLottos.length + pendingDigitalLottos.length;
+    toast('บันทึกสำเร็จ ' + total + ' เลข');
+    pendingLottos = [];
+    pendingDigitalLottos = [];
+    renderLottoList();
+    populatePeriodSelects();
+    document.getElementById('header-period').textContent = 'งวด ' + formatDate(dateVal);
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+function loadPeriod() {
+  const periods = getAllPeriods();
+  if (!periods.length) { toast('ยังไม่มีข้อมูลงวด'); return; }
+  document.getElementById('receive-date').value = periods[0];
+  toast('โหลดงวดล่าสุด: ' + formatDate(periods[0]));
+}
+
+function confirmClearPeriod() {
+  const periods = getAllPeriods();
+  if (!periods.length) { toast('ยังไม่มีข้อมูลงวดในระบบ'); return; }
+
+  // เติม dropdown ด้วยทุกงวดที่มีอยู่ใน sheet
+  const sel = document.getElementById('clear-period-select');
+  sel.innerHTML = '';
+  periods.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p;
+    opt.textContent = formatDate(p) + '  (' + p + ')';
+    sel.appendChild(opt);
+  });
+
+  // ตั้งค่า default เป็นงวดที่เลือกอยู่ใน receive-date ถ้ามี
+  const current = document.getElementById('receive-date').value;
+  if (current && periods.includes(current)) sel.value = current;
+
+  document.getElementById('clear-period-modal').classList.add('open');
+}
+
+async function executeClearPeriod() {
+  const dateVal = document.getElementById('clear-period-select').value;
+  if (!dateVal) { toast('กรุณาเลือกงวด'); return; }
+  const label = formatDate(dateVal);
+
+  document.getElementById('clear-period-modal').classList.remove('open');
+
+  // ยืนยัน 3 ครั้ง
+  const step1 = confirm('ต้องการล้างข้อมูลงวด ' + label + ' ทั้งหมดใช่ไหม?\n\n(ล็อตเตอรี่ + การขาย + ค่าต้นทุน จะถูกลบหมด)');
+  if (!step1) return;
+  const step2 = confirm('ยืนยันอีกครั้ง — ข้อมูลงวด ' + label + ' จะไม่สามารถกู้คืนได้\nแน่ใจหรือไม่?');
+  if (!step2) return;
+  const step3 = confirm('ยืนยันครั้งสุดท้าย — กด "ตกลง" เพื่อลบข้อมูลงวด ' + label + ' ถาวร');
+  if (!step3) return;
+
+  showLoading(true);
+  try {
+    const res = await api('clearPeriod', { period: dateVal });
+    if (!res.ok) { toast('ล้างข้อมูลไม่สำเร็จ: ' + (res.error || '')); return; }
+    if (_cache) delete _cache[dateVal];
+    pendingLottos = [];
+    renderLottoList();
+    populatePeriodSelects();
+    toast('ล้างข้อมูลงวด ' + label + ' แล้ว');
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+function updateHeaderPeriod(d) {
+  document.getElementById('header-period').textContent = 'งวด ' + formatDate(d);
+}
+
+// ========== PAGE 2: SELL ==========
+let currentEditSale = null;
+
+function renderSellGrid() {
+  const period = document.getElementById('sell-period').value;
+  const search = document.getElementById('sell-search').value.trim();
+  const filter = document.getElementById('sell-filter').value;
+  const grid = document.getElementById('sell-grid');
+  const statsEl = document.getElementById('sell-stats');
+
+  if (!period) { grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">เลือกงวดก่อน</p>'; return; }
+  const data = getData();
+  const pd = data[period];
+  if (!pd) { grid.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:40px;">ไม่มีข้อมูลงวดนี้</p>'; return; }
+
+  // ===== L6 แบบใบ =====
+  let paperCells = [];
+  Object.keys(pd.tickets).sort((a,b) => {
+    const t = parseInt(a.slice(-2)) - parseInt(b.slice(-2));
+    return t !== 0 ? t : a.localeCompare(b);
+  }).forEach(num => {
+    const t = pd.tickets[num];
+    if (t.copies === 2) {
+      const sale1 = pd.sales?.[num];
+      const sale2 = pd.sales?.[num + '_2'];
+      if (!sale1 && !sale2) {
+        paperCells.push({ num, slotKey: num, copies:2, slot:0, sale:null, status:'available' });
+      } else if (sale1 && sale2 && sale1.customer === sale2.customer) {
+        const st = sale1.status === 'paid' ? 'paid' : 'pending';
+        paperCells.push({ num, slotKey: num, copies:2, slot:'both', sale:sale1, status:st, bothSold:true });
+      } else {
+        let st1 = sale1 ? (sale1.status === 'paid' ? 'paid' : 'pending') : 'available';
+        let st2 = sale2 ? (sale2.status === 'paid' ? 'paid' : 'pending') : 'available';
+        paperCells.push({ num, slotKey: num,      copies:2, slot:1, sale:sale1, status:st1 });
+        paperCells.push({ num, slotKey: num+'_2', copies:2, slot:2, sale:sale2, status:st2 });
+      }
+    } else {
+      const sale = pd.sales?.[num];
+      let status = sale ? (sale.status === 'paid' ? 'paid' : 'pending') : 'available';
+      paperCells.push({ num, slotKey: num, copies:1, slot:1, sale, status });
+    }
+  });
+
+  // ===== L6 ดิจิตัล =====
+  // แต่ละ key ใน digitalTickets มีจำนวนใบ (copies) และ sales แบ่งตาม DIG_{num}_{slot}
+  let digitalCells = [];
+  const digitalTickets = pd.digitalTickets || {};
+  Object.keys(digitalTickets).sort((a,b) => {
+    const t = parseInt(a.slice(-2)) - parseInt(b.slice(-2));
+    return t !== 0 ? t : a.localeCompare(b);
+  }).forEach(num => {
+    const t = digitalTickets[num];
+    const totalCopies = t.copies || 1;
+    // นับ sales ที่ขายไปแล้วสำหรับเลขนี้ (key = DIG_{num}, DIG_{num}_2, DIG_{num}_3, ...)
+    const soldSlots = [];
+    for (let i = 1; i <= totalCopies; i++) {
+      const sk = i === 1 ? 'DIG_' + num : 'DIG_' + num + '_' + i;
+      if (pd.sales?.[sk]) soldSlots.push({ sk, sale: pd.sales[sk] });
+    }
+    const soldCount = soldSlots.length;
+    const remainCount = totalCopies - soldCount;
+    // แสดง 1 cell รวมสำหรับของที่เหลือ (ถ้ายังมี)
+    if (remainCount > 0) {
+      // slotKey สำหรับ cell ที่ยังว่าง: หา slot ถัดไป
+      let nextSlot = 1;
+      for (let i = 1; i <= totalCopies; i++) {
+        const sk = i === 1 ? 'DIG_' + num : 'DIG_' + num + '_' + i;
+        if (!pd.sales?.[sk]) { nextSlot = i; break; }
+      }
+      const sk = nextSlot === 1 ? 'DIG_' + num : 'DIG_' + num + '_' + nextSlot;
+      digitalCells.push({ num, slotKey: sk, totalCopies, remainCount, soldCount, status:'available', isDigital:true });
+    }
+    // แสดง cells ที่ขายแล้ว (รวมเป็นกลุ่มต่อลูกค้า + สถานะ)
+    // หมายเหตุ: เดิมรวมกลุ่มแค่ตามชื่อลูกค้าอย่างเดียว แล้วใช้สถานะของ slot แรกที่เจอ
+    // เป็นตัวแทนทั้งกลุ่ม ถ้าลูกค้าคนเดียวกันซื้อหลายใบแต่บางใบ "รอชำระ" บางใบ "ชำระแล้ว"
+    // จะถูกซ่อนรวมเป็นสถานะเดียว ทำให้ยอดรอชำระในหน้านี้น้อยกว่าความเป็นจริง (ไม่ตรงกับหน้าสรุป)
+    // แก้ไขโดยรวมกลุ่มตาม ลูกค้า + สถานะ เพื่อให้ใบที่สถานะต่างกันแยกเป็นคนละ card เสมอ
+    const soldByCustomer = {};
+    soldSlots.forEach(({ sk, sale }) => {
+      const st = sale.status === 'paid' ? 'paid' : 'pending';
+      const k = sale.customer + '|' + st;
+      if (!soldByCustomer[k]) soldByCustomer[k] = { sale, count: 0, slotKey: sk, status: st };
+      soldByCustomer[k].count++;
+    });
+    Object.values(soldByCustomer).forEach(({ sale, count, slotKey: sk, status: st }) => {
+      digitalCells.push({ num, slotKey: sk, totalCopies, remainCount:0, soldCount: count, status:st, sale, isDigital:true });
+    });
+  });
+
+  // Apply search/filter to both
+  let filteredPaper = paperCells;
+  let filteredDigital = digitalCells;
+  if (search) {
+    filteredPaper   = filteredPaper.filter(c => c.num.includes(search));
+    filteredDigital = filteredDigital.filter(c => c.num.includes(search));
+  }
+  if (filter) {
+    const f = filter;
+    filteredPaper   = filteredPaper.filter(c => f === 'available' ? c.status === 'available' : c.status === f);
+    filteredDigital = filteredDigital.filter(c => f === 'available' ? c.status === 'available' : c.status === f);
+  }
+
+  // Stats
+  const allSales = Object.entries(pd.sales || {});
+  const paperSalesCount   = allSales.filter(([k]) => !k.startsWith('DIG_')).length;
+  const digitalSalesCount = allSales.filter(([k]) => k.startsWith('DIG_')).length;
+  const totalPaperSlots   = Object.values(pd.tickets).reduce((s,t) => s+(t.copies||1),0);
+  const totalDigSlots     = Object.values(digitalTickets).reduce((s,t) => s+(t.copies||1),0);
+  statsEl.innerHTML = `🎟 แบบใบ: ขาย ${paperSalesCount}/${totalPaperSlots} &nbsp;|&nbsp; 💻 ดิจิตัล: ขาย ${digitalSalesCount}/${totalDigSlots}`;
+
+  // Render paper cells
+  const renderPaperCell = c => {
+    let stamp = '';
+    if (c.status === 'pending') stamp = `<div class="status-stamp stamp-pending">รอชำระ</div>`;
+    else if (c.status === 'paid') stamp = `<div class="status-stamp stamp-paid">ชำระแล้ว</div>`;
+    const clickable = c.status !== 'paid';
+    let slotLabel = '';
+    if (c.copies === 2 && c.bothSold)  slotLabel = `<div style="font-size:10px;color:var(--text-muted);">2 ใบ (ซื้อทั้งชุด)</div>`;
+    else if (c.copies === 2 && c.slot > 0) slotLabel = `<div style="font-size:10px;color:var(--text-muted);">ใบที่ ${c.slot}/2</div>`;
+    else if (c.copies === 2 && c.slot === 0) slotLabel = `<div style="font-size:10px;color:var(--text-muted);">2 ใบ</div>`;
+    const custLabel = c.sale ? `<div style="font-size:10px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">${c.sale.customer}</div>` : '';
+    return `<div class="num-cell ${c.status}" ${clickable ? `onclick="openSellModal('${c.slotKey}','${period}')"` : ''}>
+      <div class="num">${c.num}</div>
+      ${slotLabel}
+      ${custLabel}
+      ${stamp}
+    </div>`;
+  };
+
+  // Render digital cell
+  const renderDigCell = c => {
+    let stamp = '';
+    if (c.status === 'pending') stamp = `<div class="status-stamp stamp-pending">รอชำระ</div>`;
+    else if (c.status === 'paid') stamp = `<div class="status-stamp stamp-paid">ชำระแล้ว</div>`;
+    const clickable = c.status !== 'paid';
+    let qtyLabel = '';
+    if (c.status === 'available') {
+      qtyLabel = `<div style="font-size:10px;color:#1a4f8a;font-weight:700;">เหลือ ${c.remainCount} ใบ</div>`;
+    } else {
+      qtyLabel = `<div style="font-size:10px;color:var(--text-muted);">${c.soldCount} ใบ</div>`;
+    }
+    const custLabel = c.sale ? `<div style="font-size:10px;color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:90px;">${c.sale.customer}</div>` : '';
+    const clickHandler = c.status === 'available'
+      ? `openDigitalSellModal('${c.num}','${period}')`
+      : `openDigitalEditModal('${c.num}','${period}','${c.slotKey}')`;
+    return `<div class="num-cell ${c.status}" style="border-color:${c.status==='available'?'#a8c4f5':''}" ${clickable ? `onclick="${clickHandler}"` : ''}>
+      <div class="num" style="color:#1a4f8a;">${c.num}</div>
+      ${qtyLabel}
+      ${custLabel}
+      ${stamp}
+    </div>`;
+  };
+
+  let html = '';
+  if (filteredPaper.length) {
+    html += `<div style="font-size:12px;font-weight:700;color:var(--gold-dark);margin:0 0 8px;padding:6px 10px;background:var(--gold-light);border-radius:6px;">🎟 L6 แบบใบ</div>`;
+    html += `<div class="number-grid" style="margin-bottom:16px;">${filteredPaper.map(renderPaperCell).join('')}</div>`;
+  }
+  if (filteredDigital.length) {
+    html += `<div style="font-size:12px;font-weight:700;color:#1a4f8a;margin:0 0 8px;padding:6px 10px;background:#e8f0fe;border-radius:6px;">💻 L6 ดิจิตัล</div>`;
+    html += `<div class="number-grid">${filteredDigital.map(renderDigCell).join('')}</div>`;
+  }
+  if (!html) html = '<p style="color:var(--text-muted);text-align:center;padding:40px;">ไม่พบข้อมูล</p>';
+  grid.innerHTML = html;
+}
+
+function openSellModal(slotKey, period) {
+  const isSlot2 = slotKey.endsWith('_2');
+  const num = isSlot2 ? slotKey.slice(0, -2) : slotKey;
+  const data = getData();
+  const ticket = data[period]?.tickets[num];
+  const sale = data[period]?.sales?.[slotKey];
+  currentEditSale = { slotKey, num, period };
+
+  // ตรวจว่าเป็น slot รวม (2 ใบยังไม่ขายเลย), bothSold (ลูกค้าเดียวซื้อทั้ง 2), หรือ slot แยก
+  const sale1 = data[period]?.sales?.[num];
+  const sale2 = data[period]?.sales?.[num+'_2'];
+  const isCombined = ticket?.copies === 2 && !isSlot2 && !sale1 && !sale2;
+  const isBothSold = ticket?.copies === 2 && !isSlot2 && sale1 && sale2 && sale1.customer === sale2.customer;
+
+  let headerLabel = num;
+  if (isCombined)  headerLabel = num + '  [2 ใบ — เลือกจำนวน]';
+  else if (isBothSold) headerLabel = num + '  [2 ใบ — ซื้อทั้งชุด]';
+  else if (ticket?.copies === 2) headerLabel = num + (isSlot2 ? '  [ใบที่ 2]' : '  [ใบที่ 1]');
+
+  document.getElementById('modal-num').textContent = headerLabel;
+  document.getElementById('modal-number').value = slotKey;
+  document.getElementById('modal-period').value = period;
+
+  if (sale) {
+    document.getElementById('modal-customer').value = sale.customer || '';
+    document.getElementById('modal-channel').value = sale.channel || 'หน้าบ้าน';
+    document.getElementById('modal-payment').value = sale.payment || 'เงินสด';
+    document.getElementById('modal-status').value = sale.status || 'pending';
+    document.getElementById('modal-paydate').value = sale.paydate || '';
+  } else {
+    document.getElementById('modal-customer').value = '';
+    document.getElementById('modal-channel').value = 'หน้าบ้าน';
+    document.getElementById('modal-payment').value = 'เงินสด';
+    document.getElementById('modal-status').value = 'pending';
+    document.getElementById('modal-paydate').value = '';
+  }
+
+  const qtyEl = document.getElementById('modal-qty');
+  const infoEl = document.getElementById('modal-copies-info');
+  if (isCombined) {
+    qtyEl.innerHTML = '<option value="2">2 ใบ (ขายทั้งชุด)</option><option value="1">1 ใบ (เหลืออีก 1 ใบให้ขายต่อ)</option>';
+    infoEl.style.display = 'block';
+    infoEl.textContent = 'ชุดนี้มี 2 ใบ — ถ้าเลือก 1 ใบ ระบบจะแยกอีกใบออกมาให้ขายต่อได้';
+  } else if (isBothSold) {
+    qtyEl.innerHTML = '<option value="2">2 ใบ (ซื้อทั้งชุด)</option>';
+    infoEl.style.display = 'block';
+    infoEl.textContent = 'ลูกค้าซื้อทั้ง 2 ใบ — แก้ไขข้อมูลหรือสถานะได้';
+  } else if (ticket?.copies === 2) {
+    qtyEl.innerHTML = '<option value="1">1 ใบ</option>';
+    infoEl.style.display = 'block';
+    infoEl.textContent = 'กำลังบันทึก' + (isSlot2 ? 'ใบที่ 2' : 'ใบที่ 1');
+  } else {
+    qtyEl.innerHTML = '<option value="1">1 ใบ</option>';
+    infoEl.style.display = 'none';
+  }
+
+  document.getElementById('sell-modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('sell-modal').classList.remove('open'); }
+
+// Modal สำหรับ L6 ดิจิตัล (หักลบจำนวนใบ)
+function openDigitalSellModal(num, period) {
+  const data = getData();
+  const pd = data[period];
+  const digitalTickets = pd?.digitalTickets || {};
+  const t = digitalTickets[num];
+  if (!t) { toast('ไม่พบข้อมูล'); return; }
+  const totalCopies = t.copies || 1;
+
+  // นับ sold slots
+  let nextSlot = 1;
+  let soldCount = 0;
+  for (let i = 1; i <= totalCopies; i++) {
+    const sk = i === 1 ? 'DIG_' + num : 'DIG_' + num + '_' + i;
+    if (pd.sales?.[sk]) soldCount++;
+    else if (nextSlot === 1) nextSlot = i;
+  }
+  const remain = totalCopies - soldCount;
+  if (remain <= 0) { toast('ขายหมดแล้ว'); return; }
+
+  // slotKey ถัดไป
+  const slotKey = nextSlot === 1 ? 'DIG_' + num : 'DIG_' + num + '_' + nextSlot;
+  currentEditSale = { slotKey, num: 'DIG_' + num, period, isDigital: true, digitalNum: num, totalCopies, remain };
+
+  document.getElementById('modal-num').textContent = num + '  [💻 ดิจิตัล — เหลือ ' + remain + ' ใบ]';
+  document.getElementById('modal-num').style.color = '#1a4f8a';
+  document.getElementById('modal-number').value = slotKey;
+  document.getElementById('modal-period').value = period;
+  document.getElementById('modal-customer').value = '';
+  document.getElementById('modal-channel').value = 'หน้าบ้าน';
+  document.getElementById('modal-payment').value = 'เงินสด';
+  document.getElementById('modal-status').value = 'pending';
+  document.getElementById('modal-paydate').value = '';
+
+  const qtyEl = document.getElementById('modal-qty');
+  // สร้าง options จาก 1 ถึง remain
+  let opts = '';
+  for (let i = 1; i <= remain; i++) opts += `<option value="${i}">${i} ใบ</option>`;
+  qtyEl.innerHTML = opts;
+
+  const infoEl = document.getElementById('modal-copies-info');
+  infoEl.style.display = 'block';
+  infoEl.textContent = `เลข ${num} มีทั้งหมด ${totalCopies} ใบ — ขายไปแล้ว ${soldCount} ใบ — เหลือ ${remain} ใบ`;
+
+  document.getElementById('sell-modal').classList.add('open');
+}
+
+// Modal สำหรับแก้ไขรายการ L6 ดิจิตัล ที่ขายไปแล้ว (เปลี่ยนสถานะ/ข้อมูลลูกค้า)
+function openDigitalEditModal(num, period, slotKey) {
+  const data = getData();
+  const pd = data[period];
+  const sale = pd?.sales?.[slotKey];
+  if (!sale) { toast('ไม่พบข้อมูล'); return; }
+
+  // นับ slots ทั้งหมดของลูกค้าคนนี้ที่มีสถานะเดียวกัน เพื่ออัปเดตพร้อมกันทุกใบ
+  const totalCopiesDig = pd?.digitalTickets?.[num]?.copies || 1;
+  const st0 = sale.status === 'paid' ? 'paid' : 'pending';
+  const customerSlots = [];
+  for (let i = 1; i <= totalCopiesDig; i++) {
+    const sk = i === 1 ? 'DIG_' + num : 'DIG_' + num + '_' + i;
+    const s = pd?.sales?.[sk];
+    if (s && s.customer === sale.customer && (s.status === 'paid' ? 'paid' : 'pending') === st0) {
+      customerSlots.push(sk);
+    }
+  }
+  const customerCount = customerSlots.length;
+
+  currentEditSale = { slotKey, num: 'DIG_' + num, period, isDigital: true, isDigitalEdit: true, digitalNum: num, customerSlots };
+
+  document.getElementById('modal-num').textContent = num + '  [💻 ดิจิตัล — แก้ไขรายการ]';
+  document.getElementById('modal-num').style.color = '#1a4f8a';
+  document.getElementById('modal-number').value = slotKey;
+  document.getElementById('modal-period').value = period;
+  document.getElementById('modal-customer').value = sale.customer || '';
+  document.getElementById('modal-channel').value = sale.channel || 'หน้าบ้าน';
+  document.getElementById('modal-payment').value = sale.payment || 'เงินสด';
+  document.getElementById('modal-status').value = sale.status || 'pending';
+  document.getElementById('modal-paydate').value = sale.paydate || '';
+
+  const qtyEl = document.getElementById('modal-qty');
+  qtyEl.innerHTML = `<option value="${customerCount}">${customerCount} ใบ</option>`;
+
+  const infoEl = document.getElementById('modal-copies-info');
+  infoEl.style.display = 'block';
+  infoEl.textContent = `กำลังแก้ไขรายการของ ${sale.customer || ''} — จำนวน ${customerCount} ใบ`;
+
+  document.getElementById('sell-modal').classList.add('open');
+}
+
+async function saveSale() {
+  const slotKey  = document.getElementById('modal-number').value;
+  const period   = document.getElementById('modal-period').value;
+  const customer = document.getElementById('modal-customer').value.trim();
+  const qty      = parseInt(document.getElementById('modal-qty').value) || 1;
+  if (!customer) { toast('กรุณากรอกชื่อลูกค้า'); return; }
+
+  const isDigital = currentEditSale?.isDigital;
+
+  const saleObj = {
+    channel: document.getElementById('modal-channel').value,
+    payment: document.getElementById('modal-payment').value,
+    status:  document.getElementById('modal-status').value,
+    paydate: document.getElementById('modal-paydate').value,
+  };
+
+  showLoading(true);
+  try {
+    if (isDigital) {
+      if (currentEditSale?.isDigitalEdit) {
+        // แก้ไขรายการที่ขายไปแล้ว: บันทึกทับทุก slot ของลูกค้าคนนี้พร้อมกัน
+        const slotsToUpdate = currentEditSale.customerSlots?.length ? currentEditSale.customerSlots : [slotKey];
+        for (const sk of slotsToUpdate) {
+          const res = await api('saveSale', { period, slotKey: sk, customer, ...saleObj });
+          if (!res.ok) { toast('บันทึกไม่สำเร็จ: ' + res.error); return; }
+          if (!_cache[period].sales) _cache[period].sales = {};
+          _cache[period].sales[sk] = { customer, ...saleObj, savedAt: new Date().toISOString() };
+        }
+      } else {
+      // Digital: หา slots ถัดไปตาม qty ที่เลือก
+      const { digitalNum, totalCopies } = currentEditSale;
+      const slots = [];
+      let found = 0;
+      for (let i = 1; i <= totalCopies && found < qty; i++) {
+        const sk = i === 1 ? 'DIG_' + digitalNum : 'DIG_' + digitalNum + '_' + i;
+        if (!_cache[period]?.sales?.[sk]) { slots.push(sk); found++; }
+      }
+      for (const sk of slots) {
+        const res = await api('saveSale', { period, slotKey: sk, customer, ...saleObj });
+        if (!res.ok) { toast('บันทึกไม่สำเร็จ: ' + res.error); return; }
+        if (!_cache[period].sales) _cache[period].sales = {};
+        _cache[period].sales[sk] = { customer, ...saleObj, savedAt: new Date().toISOString() };
+      }
+      }
+    } else {
+      const isSlot2    = slotKey.endsWith('_2');
+      const num        = isSlot2 ? slotKey.slice(0,-2) : slotKey;
+      const ticket     = _cache[period]?.tickets[num];
+      const existSale1 = _cache[period]?.sales?.[num];
+      const existSale2 = _cache[period]?.sales?.[num+'_2'];
+      const isCombined = ticket?.copies === 2 && !isSlot2 && !existSale1 && !existSale2;
+      const isBothSold = ticket?.copies === 2 && !isSlot2 && existSale1 && existSale2 && existSale1.customer === existSale2.customer;
+
+      const slots = (isCombined && qty === 2) ? [slotKey, slotKey+'_2']
+                  : isBothSold ? [num, num+'_2']
+                  : [slotKey];
+      for (const sk of slots) {
+        const res = await api('saveSale', { period, slotKey: sk, customer, ...saleObj });
+        if (!res.ok) { toast('บันทึกไม่สำเร็จ: ' + res.error); return; }
+        if (!_cache[period].sales) _cache[period].sales = {};
+        _cache[period].sales[sk] = { customer, ...saleObj, savedAt: new Date().toISOString() };
+      }
+    }
+    closeModal();
+    renderSellGrid();
+    toast('บันทึกสำเร็จ');
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+// ========== PAGE 3: REWARD ==========
+const PRIZES = {
+  r1:  { label: 'รางวัลที่ 1',           amount: 6000000 },
+  rn1: { label: 'รางวัลใกล้เคียงที่ 1',  amount: 100000  },
+  r2nd:{ label: 'รางวัลที่ 2',           amount: 200000  },
+  r3rd:{ label: 'รางวัลที่ 3',           amount: 80000   },
+  r3f: { label: 'เลข 3 ตัวหน้า',         amount: 4000    },
+  r3b: { label: 'เลข 3 ตัวหลัง',         amount: 4000    },
+  r4:  { label: 'รางวัลที่ 4',           amount: 40000   },
+  r5:  { label: 'รางวัลที่ 5',           amount: 20000   },
+  r2:  { label: 'เลข 2 ตัวล่าง',         amount: 2000    },
+};
+
+function clearRewardFields() {
+  ['r1','rn1a','rn1b','r3f','r3f2','r3b','r3b2','r2','r2nd','r3rd','r4','r5'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('reward-results').innerHTML = '';
+  toast('ล้างเลขรางวัลแล้ว');
+}
+
+function checkReward() {
+  const period = document.getElementById('reward-period').value;
+  const r1   = document.getElementById('r1').value.trim();
+  const rn1a = document.getElementById('rn1a').value.trim();
+  const rn1b = document.getElementById('rn1b').value.trim();
+  const r3f  = document.getElementById('r3f').value.trim();
+  const r3f2 = document.getElementById('r3f2').value.trim();
+  const r3b  = document.getElementById('r3b').value.trim();
+  const r3b2 = document.getElementById('r3b2').value.trim();
+  const r2   = document.getElementById('r2').value.trim();
+  const r2nd = document.getElementById('r2nd').value.trim();
+  const r3rd = document.getElementById('r3rd').value.trim();
+  const r4raw = document.getElementById('r4').value.trim();
+  const r5raw = document.getElementById('r5').value.trim();
+
+  // parse list fields
+  const r2ndList = r2nd ? r2nd.split(/[,\s]+/).map(s=>s.trim()).filter(s=>s.length===6) : [];
+  const r3rdList = r3rd ? r3rd.split(/[,\s]+/).map(s=>s.trim()).filter(s=>s.length===6) : [];
+  const r4list   = r4raw ? r4raw.split(/[,\s]+/).map(s=>s.trim()).filter(s=>s.length===4) : [];
+  const r5list   = r5raw ? r5raw.split(/[,\s]+/).map(s=>s.trim()).filter(s=>s.length===3) : [];
+
+  if (!period) { toast('กรุณาเลือกงวด'); return; }
+  const hasAny = r1||rn1a||rn1b||r3f||r3f2||r3b||r3b2||r2||r2ndList.length||r3rdList.length||r4list.length||r5list.length;
+  if (!hasAny) { toast('กรุณากรอกหรือดึงเลขรางวัลก่อน'); return; }
+
+  const data = getData();
+  const pd = data[period];
+  if (!pd) { toast('ไม่มีข้อมูลงวดนี้'); return; }
+
+  // สร้าง winners แบบ raw ก่อน (1 entry ต่อ slot) — รวมทั้ง paper และ digital
+  let rawWinners = [];
+  Object.keys(pd.sales || {}).forEach(slotKey => {
+    const sale = pd.sales[slotKey];
+    if (!sale) return;
+    // ดึงเลข 6 หลัก (กรณี digital slotKey = DIG_123456 หรือ DIG_123456_2)
+    let num;
+    if (slotKey.startsWith('DIG_')) {
+      const stripped = slotKey.slice(4); // ตัด DIG_
+      num = stripped.endsWith('_2') || stripped.match(/_\d+$/) ? stripped.replace(/_\d+$/, '') : stripped;
+    } else {
+      num = slotKey.endsWith('_2') ? slotKey.slice(0,-2) : slotKey;
+    }
+    const prizes = [];
+
+    if (r1   && r1.length===6   && num === r1)                prizes.push({ type:'r1',   ...PRIZES.r1   });
+    if (rn1a && rn1a.length===6 && num === rn1a)              prizes.push({ type:'rn1',  ...PRIZES.rn1  });
+    if (rn1b && rn1b.length===6 && num === rn1b)              prizes.push({ type:'rn1',  ...PRIZES.rn1  });
+    if (r2ndList.includes(num))                               prizes.push({ type:'r2nd', ...PRIZES.r2nd });
+    if (r3rdList.includes(num))                               prizes.push({ type:'r3rd', ...PRIZES.r3rd });
+    if (r3f  && r3f.length===3  && num.slice(0,3)===r3f)     prizes.push({ type:'r3f',  ...PRIZES.r3f  });
+    if (r3f2 && r3f2.length===3 && num.slice(0,3)===r3f2)    prizes.push({ type:'r3f',  ...PRIZES.r3f  });
+    if (r3b  && r3b.length===3  && num.slice(3,6)===r3b)     prizes.push({ type:'r3b',  ...PRIZES.r3b  });
+    if (r3b2 && r3b2.length===3 && num.slice(3,6)===r3b2)    prizes.push({ type:'r3b',  ...PRIZES.r3b  });
+    if (r4list.some(n => num.slice(2,6)===n))                 prizes.push({ type:'r4',   ...PRIZES.r4   });
+    if (r5list.some(n => num.slice(3,6)===n))                 prizes.push({ type:'r5',   ...PRIZES.r5   });
+    if (r2   && r2.length===2   && num.slice(4,6)===r2)      prizes.push({ type:'r2',   ...PRIZES.r2   });
+
+    if (prizes.length) rawWinners.push({ num, slotKey, customer: sale.customer, prizes, sale });
+  });
+
+  // รวม slot_2 ที่ลูกค้าชื่อเดียวกันเข้าด้วยกัน (ชุด 2 ใบ ซื้อโดยคนเดียว)
+  let winners = [];
+  const merged = new Set();
+  rawWinners.forEach(w => {
+    if (merged.has(w.slotKey)) return;
+    if (w.slotKey.endsWith('_2')) {
+      // ถ้า slot_2 ยังไม่ถูก merge จาก slot หลัก ให้เพิ่มตามปกติ
+      winners.push(w); return;
+    }
+    // หา slot_2 ที่ num เดียวกัน ลูกค้าเดียวกัน
+    const partner = rawWinners.find(x => x.slotKey === w.num + '_2' && x.customer === w.customer);
+    if (partner) {
+      // รวมรางวัลและคูณ 2 สำหรับรางวัลที่ซ้ำกัน
+      const combinedPrizes = [...w.prizes];
+      partner.prizes.forEach(pp => {
+        const existing = combinedPrizes.find(cp => cp.type === pp.type);
+        if (existing) existing.qty = (existing.qty || 1) + 1;
+        else combinedPrizes.push({ ...pp, qty: 1 });
+      });
+      winners.push({ ...w, prizes: combinedPrizes, bothCopies: true });
+      merged.add(partner.slotKey);
+    } else {
+      winners.push(w);
+    }
+  });
+
+  const resEl = document.getElementById('reward-results');
+  if (!winners.length) {
+    resEl.innerHTML = `<div class="card" style="text-align:center;padding:32px;color:var(--text-muted);">
+      <div style="font-size:40px;margin-bottom:8px;">😔</div>
+      <div>ไม่มีล็อตเตอรี่ที่ขายออกไปถูกรางวัล</div></div>`;
+    return;
+  }
+
+  resEl.innerHTML = `<div class="card">
+    <div class="card-title"><div class="card-title-icon">🎉</div>ผู้โชคดีในงวดนี้</div>
+    ${winners.map(w => {
+      // คำนวณเงินรวม: ถ้า prize มี qty (ซื้อ 2 ใบ) ให้คูณด้วย qty
+      const totalAmount = w.prizes.reduce((s,p) => s + p.amount * (p.qty || 1), 0);
+      const prizeNames = w.prizes.map(p => p.label + (p.qty > 1 ? ' ×'+p.qty : '')).join(', ');
+      const typeClass = w.prizes[0].type;
+      const copiesLabel = w.bothCopies ? ' <span style="font-size:11px;background:var(--gold-light);color:var(--gold-dark);padding:2px 6px;border-radius:10px;">2 ใบ</span>' : '';
+      return `<div class="result-item ${typeClass}">
+        <div>
+          <div class="result-num">${w.num}${copiesLabel}</div>
+          <div class="result-customer">👤 ${w.customer} &nbsp;|&nbsp; ${w.sale.channel}</div>
+          <div style="font-size:12px;margin-top:4px;color:var(--text-secondary);">${prizeNames}</div>
+        </div>
+        <div style="text-align:right;">
+          <div class="result-prize" style="color:var(--red);">฿${totalAmount.toLocaleString()}</div>
+          <button class="btn btn-sm btn-gold" style="margin-top:6px;" onclick="showWinnerCard('${w.customer}','${prizeNames}',${totalAmount},'${w.prizes[0].type}')">📸 บัตรอวยพร</button>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+function showWinnerCard(customer, prize, amount, type) {
+  const themes = {
+    r1:   { bg:'linear-gradient(135deg,#1a0a00,#5c3a00,#1a0a00)', accent:'#FFD700', sub:'#F5C842' },
+    rn1:  { bg:'linear-gradient(135deg,#1a0a00,#5c3a00,#1a0a00)', accent:'#FFD700', sub:'#F5C842' },
+    r2nd: { bg:'linear-gradient(135deg,#0a1a3a,#1a3a7a,#0a1a3a)', accent:'#66AAFF', sub:'#4A88EE' },
+    r3rd: { bg:'linear-gradient(135deg,#0a2a0a,#1a5c1a,#0a2a0a)', accent:'#66FF88', sub:'#4AE066' },
+    r3f:  { bg:'linear-gradient(135deg,#0a2a0a,#1a5c1a,#0a2a0a)', accent:'#66FF88', sub:'#4AE066' },
+    r3b:  { bg:'linear-gradient(135deg,#0a1a3a,#1a3a7a,#0a1a3a)', accent:'#66AAFF', sub:'#4A88EE' },
+    r4:   { bg:'linear-gradient(135deg,#1a1a0a,#4a4a1a,#1a1a0a)', accent:'#DDDD44', sub:'#BBBB33' },
+    r5:   { bg:'linear-gradient(135deg,#1a0a1a,#3a1a3a,#1a0a1a)', accent:'#DD88FF', sub:'#BB66DD' },
+    r2:   { bg:'linear-gradient(135deg,#2a0a3a,#5a1a7a,#2a0a3a)', accent:'#DD88FF', sub:'#CC66EE' },
+  };
+  const t = themes[type] || themes.r1;
+  const card = document.getElementById('winner-card');
+  card.style.background = t.bg;
+  card.style.borderColor = t.accent;
+  document.getElementById('winner-name').style.color = t.accent;
+  document.getElementById('winner-prize-text').style.color = t.sub;
+  document.getElementById('winner-amount').style.color = t.accent;
+  document.getElementById('winner-name').textContent = 'คุณ ' + customer;
+  document.getElementById('winner-prize-text').textContent = 'ถูกรางวัล ' + prize;
+  document.getElementById('winner-amount').textContent = '฿' + amount.toLocaleString();
+  document.getElementById('winner-modal').classList.add('open');
+}
+
+function exportWinnerImage() {
+  toast('กรุณา Screenshot หน้านี้เพื่อแชร์ให้ลูกค้า');
+}
+
+// ========== PAGE 4: SUMMARY ==========
+async function saveAgentDeduction(period) {
+  const val = parseFloat(document.getElementById('agent-deduction-input').value) || 0;
+  showLoading(true);
+  try {
+    const res = await api('saveConfig', { period, key: 'agentDeduction', value: val });
+    if (!res.ok) { toast('บันทึกไม่สำเร็จ'); return; }
+    if (_cache[period]) _cache[period].agentDeduction = val;
+    renderSummary();
+    toast('บันทึกค่าตัวแทนแล้ว ✓');
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function saveCostPrice(period) {
+  const val = parseFloat(document.getElementById('cost-input').value) || 0;
+  showLoading(true);
+  try {
+    const res = await api('saveConfig', { period, key: 'costPerTicket', value: val });
+    if (!res.ok) { toast('บันทึกไม่สำเร็จ'); return; }
+    if (_cache[period]) _cache[period].costPerTicket = val;
+    renderSummary();
+    toast('บันทึกราคาทุนแล้ว');
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+async function saveDigitalCostPrice(period) {
+  const val = parseFloat(document.getElementById('digital-cost-input').value) || 70.40;
+  showLoading(true);
+  try {
+    const res = await api('saveConfig', { period, key: 'digitalCostPerTicket', value: val });
+    if (!res.ok) { toast('บันทึกไม่สำเร็จ'); return; }
+    if (_cache[period]) _cache[period].digitalCostPerTicket = val;
+    renderSummary();
+    toast('บันทึกราคาทุน L6 ดิจิตัลแล้ว');
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+// บันทึกข้อมูลขายส่ง
+async function saveWholesale(period) {
+  const data = {};
+  WS_PERSONS.forEach(p => {
+    data[p.key + '_cost']  = parseFloat(document.getElementById('ws-' + p.key + '-cost').value)  || 0;
+    data[p.key + '_price'] = parseFloat(document.getElementById('ws-' + p.key + '-price').value) || 0;
+  });
+  showLoading(true);
+  try {
+    // ส่งเป็น object ตรงๆ ผ่าน JSON.stringify ใน payload (api() จะ encode ให้)
+    const res = await api('saveConfig', { period, key: 'wholesale', value: JSON.stringify(data) });
+    if (!res.ok) { toast('บันทึกไม่สำเร็จ: ' + (res.error||'')); return; }
+    if (_cache[period]) _cache[period].wholesale = data;
+    renderSummary();
+    toast('บันทึกข้อมูลขายส่งแล้ว ✓');
+  } catch(e) {
+    toast('เกิดข้อผิดพลาด: ' + e.message);
+  } finally {
+    showLoading(false);
+  }
+}
+
+function renderSummary() {
+  const period = document.getElementById('summary-period').value;
+  const el = document.getElementById('summary-content');
+  if (!period) { el.innerHTML = '<div class="card" style="text-align:center;color:var(--text-muted);padding:40px;">เลือกงวดก่อน</div>'; return; }
+
+  const data = getData();
+  const pd = data[period];
+  if (!pd) { el.innerHTML = '<div class="card" style="text-align:center;color:var(--text-muted);padding:40px;">ไม่มีข้อมูล</div>'; return; }
+
+  // ============ L6 แบบใบ ============
+  const tickets       = pd.tickets || {};
+  const sales         = pd.sales   || {};
+  const costPerTicket = pd.costPerTicket || 0;
+  const sellPrice     = 100;
+
+  // กรองเฉพาะ sales ที่เป็น paper (key ไม่ขึ้นต้น DIG_)
+  const paperSalesEntries = Object.entries(sales).filter(([k]) => !k.startsWith('DIG_'));
+  const paperSalesObj     = Object.fromEntries(paperSalesEntries);
+
+  const totalPaperTickets = Object.values(tickets).reduce((s,t) => s + (t.copies||1), 0);
+
+  const mergedSalesRaw = [];
+  const mergedKeys = new Set();
+  paperSalesEntries.forEach(([slotKey, sale]) => {
+    if (mergedKeys.has(slotKey)) return;
+    if (slotKey.endsWith('_2')) { mergedSalesRaw.push({ num: slotKey.slice(0,-2), slotKey, copies:1, sale, isBoth:false }); return; }
+    const partnerKey = slotKey + '_2';
+    const partnerSale = paperSalesObj[partnerKey];
+    if (partnerSale && partnerSale.customer === sale.customer) {
+      mergedSalesRaw.push({ num: slotKey, slotKey, copies:2, sale, isBoth:true });
+      mergedKeys.add(partnerKey);
+    } else {
+      mergedSalesRaw.push({ num: slotKey, slotKey, copies:1, sale, isBoth:false });
+    }
+  });
+  const mergedSales = mergedSalesRaw.sort((a,b) => {
+    const t = parseInt(a.num.slice(-2)) - parseInt(b.num.slice(-2));
+    return t !== 0 ? t : a.num.localeCompare(b.num);
+  });
+
+  const soldPaperTickets   = paperSalesEntries.length;
+  const remainPaperTickets = totalPaperTickets - soldPaperTickets;
+  const paperCustomers     = new Set(paperSalesEntries.map(([,s]) => s.customer)).size;
+
+  let paperPaidCash = 0, paperPaidTransfer = 0, paperPending = 0;
+  mergedSales.forEach(({ copies, sale }) => {
+    const amount = copies * sellPrice;
+    if (sale.status === 'paid') {
+      if (sale.payment === 'เงินสด') paperPaidCash += amount;
+      else paperPaidTransfer += amount;
+    } else { paperPending += amount; }
+  });
+  const paperPaid   = paperPaidCash + paperPaidTransfer;
+  const paperProfit = costPerTicket > 0 ? (soldPaperTickets * sellPrice) - (soldPaperTickets * costPerTicket) : null;
+  const paperPct    = totalPaperTickets ? Math.round(soldPaperTickets/totalPaperTickets*100) : 0;
+
+  // ============ L6 ดิจิตัล ============
+  const digitalTickets      = pd.digitalTickets || {};
+  const digitalCostPerTicket= parseFloat(pd.digitalCostPerTicket) || 80;
+  const digitalSellPrice    = 100;
+
+  // sales ของ digital: key ขึ้นต้น DIG_
+  const digitalSalesEntries = Object.entries(sales).filter(([k]) => k.startsWith('DIG_'));
+  const soldDigitalTickets  = digitalSalesEntries.length;
+  const totalDigitalTickets = Object.values(digitalTickets).reduce((s,t) => s+(t.copies||1), 0);
+  const remainDigital       = totalDigitalTickets - soldDigitalTickets;
+
+  let digPaidCash = 0, digPaidTransfer = 0, digPending = 0;
+  digitalSalesEntries.forEach(([, sale]) => {
+    if (sale.status === 'paid') {
+      if (sale.payment === 'เงินสด') digPaidCash += digitalSellPrice;
+      else digPaidTransfer += digitalSellPrice;
+    } else { digPending += digitalSellPrice; }
+  });
+  const digPaid   = digPaidCash + digPaidTransfer;
+  const digProfit = soldDigitalTickets > 0
+    ? (soldDigitalTickets * digitalSellPrice) - (soldDigitalTickets * digitalCostPerTicket)
+    : 0;
+  const digitalPct = totalDigitalTickets ? Math.round(soldDigitalTickets/totalDigitalTickets*100) : 0;
+
+  // ============ ขายส่ง ============
+  let ws = pd.wholesale || {};
+  if (typeof ws === 'string') { try { ws = JSON.parse(ws); } catch(_) { ws = {}; } }
+  const wsRows = WS_PERSONS.map(p => {
+    const cost  = parseFloat(ws[p.key+'_cost'])  || 0;
+    const price = parseFloat(ws[p.key+'_price']) || 0;
+    return { ...p, cost, price, profit: price - cost };
+  });
+  const wsTotalProfit = wsRows.reduce((s,r) => s + r.profit, 0);
+
+  // ============ ตัวแทน (กรอกเองเป็นยอดหัก) ============
+  const agentDeduction = parseFloat(pd.agentDeduction) || 0;
+
+  // ============ กำไรรวมทั้งหมด ============
+  // สูตร: แบบใบ + ดิจิตัล + ขายส่ง - ตัวแทน
+  const totalProfitAll = (paperProfit || 0) + digProfit + wsTotalProfit - agentDeduction;
+
+  el.innerHTML = `
+  <!-- ===== L6 แบบใบ ===== -->
+  <div style="background:linear-gradient(135deg,#3d1f00,#1a0a00);padding:14px 18px;border-radius:10px;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+    <span style="font-size:18px;">🎟</span>
+    <span style="font-size:16px;font-weight:700;color:var(--gold);">L6 แบบใบ</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><div class="card-title-icon">💰</div>ราคาทุนต่อใบ — L6 แบบใบ</div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="number" id="cost-input" class="form-input" style="max-width:160px;"
+        placeholder="เช่น 83, 85, 87" value="${costPerTicket || ''}" min="0" max="200">
+      <span style="font-size:13px;color:var(--text-secondary);">บาท/ใบ</span>
+      <button class="btn btn-gold btn-sm" onclick="saveCostPrice('${period}')">บันทึก</button>
+    </div>
+    ${costPerTicket > 0 ? `<div style="margin-top:10px;font-size:13px;color:var(--text-secondary);">
+      ต้นทุนรวม ${totalPaperTickets} ใบ × ${costPerTicket} = <strong>฿${(totalPaperTickets*costPerTicket).toLocaleString()}</strong>
+      &nbsp;|&nbsp; ขายที่ 100 บาท รายได้ ${soldPaperTickets} ใบ = <strong>฿${(soldPaperTickets*sellPrice).toLocaleString()}</strong>
+    </div>` : ''}
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-val">${totalPaperTickets.toLocaleString()}</div><div class="stat-label">ล๊อตเตอรี่ทั้งหมด</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--pending);">${soldPaperTickets.toLocaleString()}</div><div class="stat-label">ขายออกไปแล้ว</div></div>
+    <div class="stat-card green"><div class="stat-val">${remainPaperTickets.toLocaleString()}</div><div class="stat-label">คงเหลือ</div></div>
+    <div class="stat-card blue"><div class="stat-val">${paperCustomers}</div><div class="stat-label">จำนวนลูกค้า</div></div>
+    <div class="stat-card gold"><div class="stat-val">฿${paperPaid.toLocaleString()}</div><div class="stat-label">ชำระแล้ว</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--pending);">฿${paperPending.toLocaleString()}</div><div class="stat-label">รอชำระ</div></div>
+    ${paperProfit !== null ? `<div class="stat-card" style="border-color:${paperProfit>=0?'var(--green)':'var(--red)'};">
+      <div class="stat-val" style="color:${paperProfit>=0?'var(--green)':'var(--red)'};">${paperProfit>=0?'+':''}฿${paperProfit.toLocaleString()}</div>
+      <div class="stat-label">กำไร L6 แบบใบ</div>
+    </div>` : ''}
+  </div>
+
+  <div class="card">
+    <div class="card-title"><div class="card-title-icon">💳</div>สรุปยอดรับเงิน — L6 แบบใบ</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="background:var(--gold-light);border-radius:8px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">💵 เงินสด</div>
+        <div style="font-size:22px;font-weight:700;color:var(--gold-dark);">฿${paperPaidCash.toLocaleString()}</div>
+      </div>
+      <div style="background:#e8f4ec;border-radius:8px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">📱 โอน</div>
+        <div style="font-size:22px;font-weight:700;color:var(--green);">฿${paperPaidTransfer.toLocaleString()}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding:10px 14px;background:var(--bg);border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:13px;color:var(--text-secondary);">รวมรับแล้ว</span>
+      <span style="font-size:18px;font-weight:700;color:var(--red);">฿${paperPaid.toLocaleString()}</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><div class="card-title-icon">📈</div>ความคืบหน้า — L6 แบบใบ</div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+      <span>ขายแล้ว ${soldPaperTickets} / ${totalPaperTickets} ใบ</span>
+      <span style="font-weight:700;">${paperPct}%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${paperPct}%"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="cursor:pointer;user-select:none;" onclick="toggleSalesList('paper-sales-list', 'paper-sales-btn')">
+      <div class="card-title-icon">📋</div>รายการขาย — L6 แบบใบ
+      <span style="margin-left:auto;font-size:12px;font-weight:600;color:var(--text-muted);">(${mergedSales.length} รายการ)</span>
+      <button id="paper-sales-btn" class="btn btn-outline btn-sm" style="margin-left:10px;pointer-events:none;">📂 แสดงรายการ</button>
+    </div>
+    <div id="paper-sales-list" style="display:none;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>เลข</th><th>ลูกค้า</th><th>ช่องทาง</th><th>ชำระ</th><th>สถานะ</th></tr></thead>
+          <tbody>
+            ${mergedSales.length ? mergedSales.map(({ num, copies, sale, isBoth }) => {
+              const dispNum = isBoth ? num + ' [2ใบ]' : num;
+              return `<tr>
+                <td><strong style="color:var(--red);letter-spacing:2px;">${dispNum}</strong></td>
+                <td>${sale.customer}</td>
+                <td><span style="font-size:12px;">${sale.channel}</span></td>
+                <td>${sale.payment}</td>
+                <td><span class="badge badge-${sale.status}">${sale.status === 'paid' ? 'ชำระแล้ว' : 'รอชำระ'}</span></td>
+              </tr>`;
+            }).join('') : '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">ยังไม่มีการขาย</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== L6 ดิจิตัล ===== -->
+  <div style="background:linear-gradient(135deg,#1a3a6a,#0a1a3a);padding:14px 18px;border-radius:10px;margin:16px 0 4px;display:flex;align-items:center;gap:8px;">
+    <span style="font-size:18px;">💻</span>
+    <span style="font-size:16px;font-weight:700;color:#66AAFF;">L6 ดิจิตัล</span>
+  </div>
+
+  <div class="card" style="border-color:#a8c4f5;">
+    <div class="card-title"><div class="card-title-icon" style="background:#e8f0fe;">💰</div>ราคาทุนต่อใบ — L6 ดิจิตัล</div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input type="number" id="digital-cost-input" class="form-input" style="max-width:160px;"
+        placeholder="100" value="${pd.digitalCostPerTicket || 80}" min="0" max="200" step="0.01">
+      <span style="font-size:13px;color:var(--text-secondary);">บาท/ใบ (ทุนปกติ 80 ขาย 100)</span>
+      <button class="btn btn-sm" style="background:#1a4f8a;color:#fff;" onclick="saveDigitalCostPrice('${period}')">บันทึก</button>
+    </div>
+    <div style="margin-top:10px;font-size:13px;color:var(--text-secondary);">
+      ต้นทุนรวม ${totalDigitalTickets} ใบ × ${digitalCostPerTicket} = <strong>฿${(totalDigitalTickets*digitalCostPerTicket).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</strong>
+      &nbsp;|&nbsp; ขายที่ 100 บาท รายได้ ${soldDigitalTickets} ใบ = <strong>฿${(soldDigitalTickets*digitalSellPrice).toLocaleString()}</strong>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card" style="border-color:#a8c4f5;"><div class="stat-val" style="color:#1a4f8a;">${totalDigitalTickets.toLocaleString()}</div><div class="stat-label">L6 ดิจิตัลทั้งหมด</div></div>
+    <div class="stat-card" style="border-color:#a8c4f5;"><div class="stat-val" style="color:var(--pending);">${soldDigitalTickets.toLocaleString()}</div><div class="stat-label">ขายออกไปแล้ว</div></div>
+    <div class="stat-card" style="border-color:#a8c4f5;"><div class="stat-val" style="color:var(--green);">${remainDigital.toLocaleString()}</div><div class="stat-label">คงเหลือ</div></div>
+    <div class="stat-card" style="border-color:#a8c4f5;"><div class="stat-val" style="color:#1a4f8a;">฿${digPaid.toLocaleString()}</div><div class="stat-label">ชำระแล้ว</div></div>
+    <div class="stat-card" style="border-color:#a8c4f5;"><div class="stat-val" style="color:var(--pending);">฿${digPending.toLocaleString()}</div><div class="stat-label">รอชำระ</div></div>
+    <div class="stat-card" style="border-color:${digProfit>=0?'#1a4f8a':'var(--red)'};">
+      <div class="stat-val" style="color:${digProfit>=0?'#1a4f8a':'var(--red)'};">${digProfit>=0?'+':''}฿${digProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+      <div class="stat-label">กำไร L6 ดิจิตัล</div>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#a8c4f5;">
+    <div class="card-title"><div class="card-title-icon" style="background:#e8f0fe;">💳</div>สรุปยอดรับเงิน — L6 ดิจิตัล</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div style="background:#e8f0fe;border-radius:8px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">💵 เงินสด</div>
+        <div style="font-size:22px;font-weight:700;color:#1a4f8a;">฿${digPaidCash.toLocaleString()}</div>
+      </div>
+      <div style="background:#e8f4ec;border-radius:8px;padding:14px;text-align:center;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">📱 โอน</div>
+        <div style="font-size:22px;font-weight:700;color:var(--green);">฿${digPaidTransfer.toLocaleString()}</div>
+      </div>
+    </div>
+    <div style="margin-top:10px;padding:10px 14px;background:var(--bg);border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:13px;color:var(--text-secondary);">รวมรับแล้ว</span>
+      <span style="font-size:18px;font-weight:700;color:#1a4f8a;">฿${digPaid.toLocaleString()}</span>
+    </div>
+  </div>
+
+  <div class="card" style="border-color:#a8c4f5;">
+    <div class="card-title"><div class="card-title-icon" style="background:#e8f0fe;">📈</div>ความคืบหน้า — L6 ดิจิตัล</div>
+    <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;">
+      <span>ขายแล้ว ${soldDigitalTickets} / ${totalDigitalTickets} ใบ</span>
+      <span style="font-weight:700;">${digitalPct}%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${digitalPct}%;background:linear-gradient(90deg,#1a4f8a,#66AAFF);"></div></div>
+  </div>
+
+  <div class="card" style="border-color:#a8c4f5;">
+    <div class="card-title" style="cursor:pointer;user-select:none;" onclick="toggleSalesList('digital-sales-list', 'digital-sales-btn')">
+      <div class="card-title-icon" style="background:#e8f0fe;">📋</div>รายการขาย — L6 ดิจิตัล
+      <span style="margin-left:auto;font-size:12px;font-weight:600;color:var(--text-muted);">(${digitalSalesEntries.length} รายการ)</span>
+      <button id="digital-sales-btn" class="btn btn-outline btn-sm" style="margin-left:10px;pointer-events:none;">📂 แสดงรายการ</button>
+    </div>
+    <div id="digital-sales-list" style="display:none;">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>เลข</th><th>ลูกค้า</th><th>ช่องทาง</th><th>ชำระ</th><th>สถานะ</th></tr></thead>
+          <tbody>
+            ${(() => {
+              if (!digitalSalesEntries.length) return '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);">ยังไม่มีการขาย</td></tr>';
+              // รวม slot ที่เลขเดียวกัน ลูกค้าคนเดียวกัน ให้แสดงเป็นแถวเดียว
+              const digSalesObj = Object.fromEntries(digitalSalesEntries);
+              const digMergedRaw = [];
+              const digMergedKeys = new Set();
+              // เรียงตาม 2 ตัวท้าย
+              const sortedDigEntries = [...digitalSalesEntries].sort((a,b) => {
+                const na = a[0].startsWith('DIG_') ? a[0].slice(4).replace(/_\d+$/,'') : a[0];
+                const nb = b[0].startsWith('DIG_') ? b[0].slice(4).replace(/_\d+$/,'') : b[0];
+                const t = parseInt(na.slice(-2)) - parseInt(nb.slice(-2));
+                return t !== 0 ? t : na.localeCompare(nb);
+              });
+              sortedDigEntries.forEach(([slotKey, sale]) => {
+                if (digMergedKeys.has(slotKey)) return;
+                // ดึงเลขจริง (ตัด DIG_ และ _N suffix)
+                const rawNum = slotKey.startsWith('DIG_') ? slotKey.slice(4) : slotKey;
+                const baseNum = rawNum.replace(/_\d+$/, '');
+                // หา slot อื่นที่มีเลขเดียวกัน ลูกค้าเดียวกัน ยังไม่ถูก merge
+                let count = 1;
+                sortedDigEntries.forEach(([sk2, s2]) => {
+                  if (sk2 === slotKey || digMergedKeys.has(sk2)) return;
+                  const rn2 = sk2.startsWith('DIG_') ? sk2.slice(4) : sk2;
+                  const bn2 = rn2.replace(/_\d+$/, '');
+                  if (bn2 === baseNum && s2.customer === sale.customer) {
+                    count++;
+                    digMergedKeys.add(sk2);
+                  }
+                });
+                digMergedRaw.push({ baseNum, count, sale });
+                digMergedKeys.add(slotKey);
+              });
+              return digMergedRaw.map(({ baseNum, count, sale }) => {
+                const dispNum = count > 1 ? baseNum + ' [' + count + 'ใบ]' : baseNum;
+                return `<tr>
+                  <td><strong style="color:#1a4f8a;letter-spacing:2px;">${dispNum}</strong></td>
+                  <td>${sale.customer}</td>
+                  <td><span style="font-size:12px;">${sale.channel}</span></td>
+                  <td>${sale.payment}</td>
+                  <td><span class="badge badge-${sale.status}">${sale.status === 'paid' ? 'ชำระแล้ว' : 'รอชำระ'}</span></td>
+                </tr>`;
+              }).join('');
+            })()}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ขายส่ง ===== -->
+  <div style="background:linear-gradient(135deg,#1a4a1a,#0a2a0a);padding:14px 18px;border-radius:10px;margin:16px 0 4px;display:flex;align-items:center;gap:8px;">
+    <span style="font-size:18px;">🚚</span>
+    <span style="font-size:16px;font-weight:700;color:#66FF88;">การขายส่ง</span>
+  </div>
+
+  <div class="card" style="border-color:#88d4a0;">
+    <div class="card-title"><div class="card-title-icon" style="background:#e6f4ed;">🤝</div>ข้อมูลการขายส่ง</div>
+    <div style="overflow-x:auto;">
+      <table style="min-width:460px;">
+        <thead>
+          <tr>
+            <th>ชื่อ</th>
+            <th>ราคาทุน (฿)</th>
+            <th>ราคาส่ง (฿)</th>
+            <th>กำไร (฿)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${wsRows.map(r => `
+          <tr>
+            <td style="font-weight:700;">${r.label}</td>
+            <td><input type="number" id="ws-${r.key}-cost" class="form-input" style="width:120px;padding:6px 8px;" value="${r.cost||''}" placeholder="0" min="0" step="0.01"></td>
+            <td><input type="number" id="ws-${r.key}-price" class="form-input" style="width:120px;padding:6px 8px;" value="${r.price||''}" placeholder="0" min="0" step="0.01" oninput="updateWsProfit('${r.key}')"></td>
+            <td id="ws-${r.key}-profit" style="font-weight:700;color:${r.profit>0?'var(--green)':r.profit<0?'var(--red)':'var(--text-muted)'};">
+              ${r.profit !== 0 ? (r.profit>0?'+':'') + '฿' + r.profit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : '-'}
+            </td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <button class="btn btn-sm btn-green" onclick="saveWholesale('${period}')">💾 บันทึกขายส่ง</button>
+      <span style="font-size:13px;color:var(--text-secondary);">
+        รวมกำไรขายส่ง:
+        <strong style="color:${wsTotalProfit>=0?'var(--green)':'var(--red)'};">
+          ${wsTotalProfit>=0?'+':''}฿${wsTotalProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
+        </strong>
+      </span>
+    </div>
+  </div>
+
+  <!-- ===== กำไรรวมทั้งหมด ===== -->
+  <div class="card" style="border:2px solid var(--gold);background:linear-gradient(135deg,#fffbef,#fff8e0);">
+    <div class="card-title"><div class="card-title-icon">🏆</div>กำไรรวมทั้งหมด</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:14px;">
+      <div style="text-align:center;padding:12px;background:#fff;border-radius:8px;border:1px solid var(--border);">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🎟 L6 แบบใบ</div>
+        <div style="font-size:18px;font-weight:700;color:${(paperProfit||0)>=0?'var(--green)':'var(--red)'};">${(paperProfit||0)>=0?'+':''}฿${(paperProfit||0).toLocaleString()}</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:#fff;border-radius:8px;border:1px solid #a8c4f5;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">💻 L6 ดิจิตัล</div>
+        <div style="font-size:18px;font-weight:700;color:${digProfit>=0?'#1a4f8a':'var(--red)'};">${digProfit>=0?'+':''}฿${digProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:#fff;border-radius:8px;border:1px solid #88d4a0;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">🚚 ขายส่ง</div>
+        <div style="font-size:18px;font-weight:700;color:${wsTotalProfit>=0?'var(--green)':'var(--red)'};">${wsTotalProfit>=0?'+':''}฿${wsTotalProfit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+      </div>
+      <div style="text-align:center;padding:12px;background:#fff;border-radius:8px;border:1px solid #cc88ff;grid-column:span 1;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">🤝 ตัวแทน (หัก)</div>
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center;">
+          <input type="number" id="agent-deduction-input" class="form-input" style="max-width:100px;font-size:14px;font-weight:700;text-align:center;color:var(--red);"
+            placeholder="0" value="${agentDeduction || ''}" min="0" step="0.01">
+        </div>
+        <button class="btn btn-sm" style="background:#6a2a9a;color:#fff;margin-top:6px;width:100%;" onclick="saveAgentDeduction('${period}')">บันทึก</button>
+      </div>
+    </div>
+    <div style="padding:16px;background:linear-gradient(135deg,#1a0a00,#3d1f00);border-radius:10px;text-align:center;">
+      <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-bottom:4px;">แบบใบ + ดิจิตัล + ขายส่ง − ตัวแทน</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:6px;">กำไรสุทธิรวมทุกส่วน</div>
+      <div style="font-size:36px;font-weight:700;color:${totalProfitAll>=0?'#FFD700':'#FF6666'};">
+        ${totalProfitAll>=0?'+':''}฿${totalProfitAll.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})}
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:8px;margin-top:4px;">
+    <button class="btn btn-gold btn-full" onclick="exportExcel('${period}')">📥 Export Excel</button>
+  </div>`;
+}
+
+// toggle รายการขาย (ซ่อน/แสดง)
+function toggleSalesList(listId, btnId) {
+  const list = document.getElementById(listId);
+  const btn  = document.getElementById(btnId);
+  if (!list) return;
+  const isOpen = list.style.display !== 'none';
+  list.style.display = isOpen ? 'none' : 'block';
+  if (btn) btn.textContent = isOpen ? '📂 แสดงรายการ' : '📁 ซ่อนรายการ';
+}
+
+
+function updateWsProfit(key) {
+  const cost  = parseFloat(document.getElementById('ws-'+key+'-cost').value)  || 0;
+  const price = parseFloat(document.getElementById('ws-'+key+'-price').value) || 0;
+  const profit = price - cost;
+  const el = document.getElementById('ws-'+key+'-profit');
+  if (el) {
+    el.style.color = profit > 0 ? 'var(--green)' : profit < 0 ? 'var(--red)' : 'var(--text-muted)';
+    el.textContent = profit !== 0 ? (profit>0?'+':'') + '฿' + profit.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2}) : '-';
+  }
+}
+
+function fmtExportDate(d) {
+  if (!d) return '';
+  let day, month, year;
+  // กรณี YYYY-MM-DD (รูปแบบที่ input[type=date] ส่งมา)
+  const isoMatch = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    year  = parseInt(isoMatch[1]);
+    month = parseInt(isoMatch[2]);
+    day   = parseInt(isoMatch[3]);
+  } else {
+    // กรณี Date object หรือ string แบบอื่น — ใช้ UTC เพื่อหลีกเลี่ยง timezone shift
+    const dt = new Date(d);
+    if (isNaN(dt.getTime())) return d;
+    year  = dt.getUTCFullYear();
+    month = dt.getUTCMonth() + 1;
+    day   = dt.getUTCDate();
+  }
+  const buddhistYear = year + 543;
+  return String(day).padStart(2,'0') + '/' + String(month).padStart(2,'0') + '/' + buddhistYear;
+}
+
+function exportExcel(period) {
+  const data = getData();
+  const pd = data[period];
+  if (!pd) return;
+
+  const costPerTicket        = pd.costPerTicket        || 0;
+  const digitalCostPerTicket = pd.digitalCostPerTicket || 80;
+  const agentDeduction       = parseFloat(pd.agentDeduction) || 0;
+  const sellPrice            = 100;
+
+  // ===== แถวข้อมูลการขาย (รวม _2 ถ้าลูกค้าเดียวกัน) =====
+  const salesRows = [];
+
+  // --- L6 แบบใบ ---
+  const paperEntries = Object.entries(pd.sales || {}).filter(([k]) => !k.startsWith('DIG_'));
+  const paperObj     = Object.fromEntries(paperEntries);
+  const paperMergedKeys = new Set();
+  const sortedPaperEntries = [...paperEntries].sort((a,b) => {
+    const na = a[0].endsWith('_2') ? a[0].slice(0,-2) : a[0];
+    const nb = b[0].endsWith('_2') ? b[0].slice(0,-2) : b[0];
+    const t = parseInt(na.slice(-2)) - parseInt(nb.slice(-2));
+    return t !== 0 ? t : na.localeCompare(nb);
+  });
+  sortedPaperEntries.forEach(([slotKey, sale]) => {
+    if (paperMergedKeys.has(slotKey)) return;
+    const num = slotKey.endsWith('_2') ? slotKey.slice(0,-2) : slotKey;
+    const partnerKey = num + '_2';
+    const partner = paperObj[partnerKey];
+    let copies = 1;
+    if (!slotKey.endsWith('_2') && partner && partner.customer === sale.customer) {
+      copies = 2;
+      paperMergedKeys.add(partnerKey);
+    }
+    paperMergedKeys.add(slotKey);
+    const dispNum = copies === 2 ? num + ' [2ใบ]' : num;
+    salesRows.push(['L6 แบบใบ', dispNum, sale.customer, sale.channel, sale.payment,
+      sale.status === 'paid' ? 'ชำระแล้ว' : 'รอชำระ', fmtExportDate(sale.paydate)]);
+  });
+
+  // --- L6 ดิจิตัล ---
+  const digEntries = Object.entries(pd.sales || {}).filter(([k]) => k.startsWith('DIG_'));
+  const digMergedKeys = new Set();
+  const sortedDigEntries = [...digEntries].sort((a,b) => {
+    const na = a[0].slice(4).replace(/_\d+$/,'');
+    const nb = b[0].slice(4).replace(/_\d+$/,'');
+    const t = parseInt(na.slice(-2)) - parseInt(nb.slice(-2));
+    return t !== 0 ? t : na.localeCompare(nb);
+  });
+  sortedDigEntries.forEach(([slotKey, sale]) => {
+    if (digMergedKeys.has(slotKey)) return;
+    const baseNum = slotKey.slice(4).replace(/_\d+$/, '');
+    let count = 1;
+    sortedDigEntries.forEach(([sk2, s2]) => {
+      if (sk2 === slotKey || digMergedKeys.has(sk2)) return;
+      const bn2 = sk2.slice(4).replace(/_\d+$/, '');
+      if (bn2 === baseNum && s2.customer === sale.customer) { count++; digMergedKeys.add(sk2); }
+    });
+    digMergedKeys.add(slotKey);
+    const dispNum = count > 1 ? baseNum + ' [' + count + 'ใบ]' : baseNum;
+    salesRows.push(['L6 ดิจิตัล', dispNum, sale.customer, sale.channel, sale.payment,
+      sale.status === 'paid' ? 'ชำระแล้ว' : 'รอชำระ', fmtExportDate(sale.paydate)]);
+  });
+
+  // ===== คำนวณสรุปกำไร =====
+  const paperCount   = paperEntries.length;
+  const digCount     = digEntries.length;
+  const paperRevenue = paperCount * sellPrice;
+  const digRevenue   = digCount   * sellPrice;
+  const paperCost    = paperCount * costPerTicket;
+  const digCost      = digCount   * digitalCostPerTicket;
+  const paperProfit  = paperRevenue - paperCost;
+  const digProfit    = digRevenue   - digCost;
+
+  let ws = pd.wholesale || {};
+  if (typeof ws === 'string') { try { ws = JSON.parse(ws); } catch(_) { ws = {}; } }
+  let wsTotalProfit = 0;
+  WS_PERSONS.forEach(p => {
+    const cost  = parseFloat(ws[p.key+'_cost'])  || 0;
+    const price = parseFloat(ws[p.key+'_price']) || 0;
+    wsTotalProfit += price - cost;
+  });
+
+  // กำไรสุทธิ = แบบใบ + ดิจิตัล + ขายส่ง - ตัวแทน
+  const totalNet = paperProfit + digProfit + wsTotalProfit - agentDeduction;
+
+  // ===== สร้าง CSV =====
+  const rows = [
+    ['ประเภท','เลข','ลูกค้า','ช่องทาง','ชำระ','สถานะ','วันชำระ'],
+    ...salesRows,
+    [],
+    ['===== สรุปกำไร ====='],
+    ['หัวข้อ','จำนวนใบ','รายได้','ต้นทุน/ใบ','ต้นทุนรวม','กำไร'],
+    ['L6 แบบใบ', paperCount, paperRevenue, costPerTicket, paperCost, paperProfit],
+    ['L6 ดิจิตัล', digCount, digRevenue, digitalCostPerTicket, digCost, digProfit],
+    [],
+    ['===== ขายส่ง ====='],
+    ['ชื่อ','ราคาทุน','ราคาส่ง','กำไร'],
+    ...WS_PERSONS.map(p => {
+      const c = parseFloat(ws[p.key+'_cost'])  || 0;
+      const r = parseFloat(ws[p.key+'_price']) || 0;
+      return [p.label, c, r, r - c];
+    }),
+    ['รวมกำไรขายส่ง','','','', wsTotalProfit],
+    [],
+    ['===== ตัวแทน (หัก) ====='],
+    ['ยอดหักตัวแทน', agentDeduction],
+    [],
+    ['===== กำไรสุทธิรวม ====='],
+    ['แบบใบ + ดิจิตัล + ขายส่ง − ตัวแทน','','','','', totalNet],
+  ];
+
+  const csv = rows.map(r => r.map(v => `"${String(v ?? '').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'lotto_' + period + '.csv'; a.click();
+  URL.revokeObjectURL(url);
+  toast('Export สำเร็จ');
+}
+
+// ========== INIT ==========
+// ========== PWA: Register Service Worker ==========
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(e => console.log('SW error:', e));
+  });
+}
+
+window.onload = async () => {
+  await loadAllData();
+  populatePeriodSelects();
+  const periods = getAllPeriods();
+  if (periods.length) document.getElementById('header-period').textContent = 'งวด ' + formatDate(periods[0]);
+  document.getElementById('receive-date').value = new Date().toISOString().slice(0,10);
+};
+</script>
+</body>
+</html>
